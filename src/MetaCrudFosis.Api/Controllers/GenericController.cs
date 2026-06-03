@@ -1,6 +1,9 @@
 using MetaCrudFosis.Api.Models;
 using MetaCrudFosis.Api.Repositories;
 using Microsoft.AspNetCore.Mvc;
+using System.Text;
+using System.Text.Json;
+using System.Xml.Serialization;
 
 namespace MetaCrudFosis.Api.Controllers;
 
@@ -54,5 +57,27 @@ public class GenericController<T> : ControllerBase where T : class, IEntity
     {
         var ok = await _repository.DeleteAsync(id);
         return ok ? NoContent() : NotFound();
+    }
+
+    [HttpGet("export/json")]
+    public async Task<IActionResult> ExportJson()
+    {
+        var data = await _repository.GetAllAsync();
+        var json = JsonSerializer.SerializeToUtf8Bytes(data,
+            new JsonSerializerOptions { WriteIndented = true });
+
+        return File(json, "application/json", $"{typeof(T).Name}.json");
+    }
+
+    [HttpGet("export/xml")]
+    public async Task<IActionResult> ExportXml()
+    {
+        var data = (await _repository.GetAllAsync()).ToList();
+
+        var serializer = new XmlSerializer(typeof(List<T>));
+        using var stream = new MemoryStream();
+        serializer.Serialize(stream, data);
+
+        return File(stream.ToArray(), "application/xml", $"{typeof(T).Name}.xml");
     }
 }
