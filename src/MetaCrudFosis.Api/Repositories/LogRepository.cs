@@ -18,6 +18,9 @@ public class LogRepository : ILogRepository
     }
 
     public SystemLog Add(string level, string message)
+        => Add(level, message, null, null);
+
+    public SystemLog Add(string level, string message, string? source, string? details)
     {
         using var db = new LiteDatabase(_connectionString);
         var logs = db.GetCollection<SystemLog>("logs");
@@ -26,10 +29,12 @@ public class LogRepository : ILogRepository
         {
             Level = level,
             Message = message,
-            Timestamp = DateTime.Now
+            Source = source,
+            Details = details,
+            Timestamp = DateTime.Now 
         };
 
-        logs.Insert(entry); // LiteDB asigna el Id autoincremental
+        logs.Insert(entry);
         return entry;
     }
 

@@ -11,6 +11,20 @@ Este documento recoge mejoras y funcionalidades identificadas que, por limitaci�
 ## Fase 6 (Bonus / Corto Plazo)
 - [ ] **Plugin de Base de Datos:** Permitir al usuario elegir entre SQLite (por defecto) y SQL Server desde el generador, modificando dinámicamente el `DbContext` y las cadenas de conexión.
 - [ ] **Botón de Limpieza:** Implementar en el generador una función que lea un `manifest.json` y elimine los archivos de la última entidad generada para permitir pruebas iterativas limpias.
+- [ ] **Sistema de Login para acceder al Crud** Implementar que se genere ( o mute con el .tt) un sistema de login super básico para poder interactuar con el CRUD correspondiente.
+- [ ] **Añadir Https** Implementar que las urls no solo sean por http si no por https y validar y certificar su uso.
+
+## Infraestructura
+- [ ] Migrar a HTTPS (API, Web, CORS, HttpClient BaseAddress, fetch JS y WebView de MAUI). Pospuesto: en localhost HTTP es suficiente; revisar en Fase 7.
+
+## Pulido
+- [ ] Portada (Home) con bienvenida y enlace a /Producto o con estilo de pantalla de carga.
+
+    Subir Archivo .CSV directamente con input.
+    Revisar Estilos.
+
+
+Realizar el .exe ? 
 
 ## Versiones Futuras (Largo Plazo)
 - [ ] **Soporte de Imágenes:** Añadir un tipo de campo "Image" que gestione `IFormFile`, guarde la ruta en la BD y muestre un preview en la vista MVC.

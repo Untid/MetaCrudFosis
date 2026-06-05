@@ -37,25 +37,63 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class, IEnti
                 BindingFlags.IgnoreCase | BindingFlags.Public | BindingFlags.Instance);
             if (prop is null) continue;
 
-            object typedValue;
-            try
-            {
-                var targetType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
-                typedValue = Convert.ChangeType(rawValue, targetType, CultureInfo.InvariantCulture);
-            }
-            catch
-            {
-                continue; // valor no convertible al tipo de la propiedad → se ignora
-            }
-
-            // Construye: x => x.Prop == typedValue
             var param = Expression.Parameter(typeof(T), "x");
             var member = Expression.Property(param, prop);
-            var constant = Expression.Constant(typedValue, prop.PropertyType);
-            var equals = Expression.Equal(member, constant);
-            var lambda = Expression.Lambda<Func<T, bool>>(equals, param);
+            Expression body;
 
-            query = query.Where(lambda);
+            if (prop.PropertyType == typeof(string))
+            {
+                // Texto → búsqueda parcial (LIKE '%valor%')
+                var contains = typeof(string).GetMethod(nameof(string.Contains), new[] { typeof(string) })!;
+                body = Expression.Call(member, contains, Expression.Constant(rawValue, typeof(string)));
+            }
+            else if (prop.PropertyType == typeof(DateTime))
+            {
+                // Filtro jerárquico por año / año-mes / año-mes-día según las partes recibidas.
+                // "2026" → todo el año; "2026-05" → ese mes; "2026-05-06" → ese día.
+                var partes = rawValue.Split('-', StringSplitOptions.RemoveEmptyEntries);
+
+                if (partes.Length == 0 || !int.TryParse(partes[0], out var anio))
+                    continue; // valor no usable → se ignora este filtro
+
+                // x.Fecha.Year == anio
+                var yearProp = typeof(DateTime).GetProperty(nameof(DateTime.Year))!;
+                body = Expression.Equal(Expression.Property(member, yearProp),
+                                        Expression.Constant(anio, typeof(int)));
+
+                // + x.Fecha.Month == mes  (si se dio)
+                if (partes.Length >= 2 && int.TryParse(partes[1], out var mes) && mes is >= 1 and <= 12)
+                {
+                    var monthProp = typeof(DateTime).GetProperty(nameof(DateTime.Month))!;
+                    var mesEq = Expression.Equal(Expression.Property(member, monthProp),
+                                                 Expression.Constant(mes, typeof(int)));
+                    body = Expression.AndAlso(body, mesEq);
+
+                    // + x.Fecha.Day == dia  (si se dio)
+                    if (partes.Length >= 3 && int.TryParse(partes[2], out var dia) && dia is >= 1 and <= 31)
+                    {
+                        var dayProp = typeof(DateTime).GetProperty(nameof(DateTime.Day))!;
+                        var diaEq = Expression.Equal(Expression.Property(member, dayProp),
+                                                     Expression.Constant(dia, typeof(int)));
+                        body = Expression.AndAlso(body, diaEq);
+                    }
+                }
+            }
+            else
+            {
+                // int, decimal, bool → igualdad exacta
+                object typedValue;
+                try
+                {
+                    var targetType = Nullable.GetUnderlyingType(prop.PropertyType) ?? prop.PropertyType;
+                    typedValue = Convert.ChangeType(rawValue, targetType, CultureInfo.InvariantCulture);
+                }
+                catch { continue; }
+
+                body = Expression.Equal(member, Expression.Constant(typedValue, prop.PropertyType));
+            }
+
+            query = query.Where(Expression.Lambda<Func<T, bool>>(body, param));
         }
 
         return await query.ToListAsync();

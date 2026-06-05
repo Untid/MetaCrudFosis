@@ -1,0 +1,255 @@
+@model List<Producto>
+@{
+    ViewData["Title"] = "Productos";
+    const string apiBase = "http://localhost:5001";
+}
+
+@section Styles {
+    <style>
+        /* INYECCIÓN DE COLOR CORPORATIVO (clave para Fase 3).
+                           En Fase 3, T4 sustituirá este valor por: <#= CorpColor #> */
+        :root {
+            --corp-color: #e91e63;
+        }
+    </style>
+}
+
+<div class="card">
+    <div class="toolbar">
+        <h1>Productos</h1>
+        <span class="spacer"></span>
+        <!-- Selector de campo: en Fase 3, T4 generará un <option> por cada propiedad de la entidad -->
+        <select id="filtroCampo" class="filtro-campo" onchange="buscar()">
+            <option value="Nombre">Nombre</option>
+            <option value="Precio">Precio</option>
+            <option value="Stock">Stock</option>
+            <option value="FechaAlta">Fecha de alta</option>
+        </select>
+        <input id="busqueda" class="search" type="text"
+               placeholder="Buscar…" oninput="buscar()" />
+        <a class="btn" href="/Producto/Create">+ Crear</a>
+    </div>
+
+    <div class="toolbar">
+        <a class="btn btn-secondary" href="@apiBase/api/Producto/export/json">Exportar JSON</a>
+        <a class="btn btn-secondary" href="@apiBase/api/Producto/export/xml">Exportar XML</a>
+    </div>
+
+    <!-- IMPORTACIÓN MASIVA (molde para T4) -->
+    <details class="importar">
+        <summary>📋 Importar varios productos de golpe</summary>
+        <div class="importar-cuerpo">
+            <p class="importar-ayuda">
+                <strong>Copia las celdas directamente desde Excel o Google Sheets y pégalas aquí abajo</strong>
+                o <strong>pega directamente el JSON</strong>
+                (Ctrl+C en la hoja, Ctrl+V en el recuadro). También puedes escribir los valores separados por comas.
+            </p>
+            <p class="importar-orden">
+                Una fila por línea, en este orden:
+                <code>Nombre · Precio · Stock · FechaAlta (yyyy-MM-dd)</code>
+            </p>
+            <textarea id="bulkTexto" class="bulk-area" rows="6"
+                      placeholder="Teclado mecánico	79.99	15	2026-06-03&#10;Ratón inalámbrico	29.99	40	2026-06-04"></textarea>
+            <div class="actions-row">
+                <button class="btn" onclick="importarBulk()">Importar</button>
+                <span id="bulkMsg" class="bulk-msg"></span>
+            </div>
+        </div>
+    </details>
+
+    <table>
+        <thead>
+            <tr><th>Nombre</th><th>Precio</th><th>Stock</th><th>Fecha de alta</th><th>Acciones</th></tr>
+        </thead>
+        <tbody id="tablaProductos">
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="5" class="empty">No hay productos todavía.</td></tr>
+            }
+            else
+            {
+                @foreach (var producto in Model)
+                {
+                    <tr>
+                        <td>@producto.Nombre</td>
+                        <td>@producto.Precio.ToString("0.00") €</td>
+                        <td>@producto.Stock</td>
+                        <td>@Html.DisplayFor(m => producto.FechaAlta)</td>
+                        <td class="acciones">
+                            <a class="btn btn-sm btn-secondary" href="/Producto/Edit/@producto.Id">Editar</a>
+                            <button class="btn btn-sm btn-danger" onclick="pedirEliminar(@producto.Id, '@producto.Nombre')">Eliminar</button>
+                        </td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- Modal de confirmación (reutilizable; T4 lo emitirá en cada Index) -->
+<div class="modal-overlay" id="modalEliminar">
+    <div class="modal">
+        <h3>Eliminar producto</h3>
+        <p id="modalTexto">¿Seguro que quieres eliminar este elemento?</p>
+        <div class="actions-row">
+            <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+            <button class="btn btn-danger" onclick="confirmarEliminar()">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const API = '@apiBase';
+        let debounce;
+        let idAEliminar = null;
+
+        function fmtFecha(iso) {
+            if (!iso) return '';
+            const d = new Date(iso);
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${d.getFullYear()}-${mm}-${dd}`; // yyyy-MM-dd en hora local
+        }
+
+        function fmtPrecio(n) { return Number(n).toFixed(2) + ' €'; }
+
+        function renderRows(items) {
+            const tbody = document.getElementById('tablaProductos');
+            if (!items.length) {
+                tbody.innerHTML = '<tr><td colspan="5" class="empty">Sin resultados.</td></tr>';
+                return;
+            }
+            tbody.innerHTML = items.map(p => `
+                <tr>
+                    <td>${p.nombre ?? ''}</td>
+                    <td>${fmtPrecio(p.precio)}</td>
+                    <td>${p.stock}</td>
+                    <td>${fmtFecha(p.fechaAlta)}</td>
+                    <td class="acciones">
+                        <a class="btn btn-sm btn-secondary" href="/Producto/Edit/${p.id}">Editar</a>
+                        <button class="btn btn-sm btn-danger" onclick="pedirEliminar(${p.id}, '${(p.nombre ?? '').replace(/'/g, "\\'")}')">Eliminar</button>
+                    </td>
+                </tr>`).join('');
+        }
+
+        // Búsqueda por el campo seleccionado en el desplegable
+        function buscar() {
+            clearTimeout(debounce);
+            debounce = setTimeout(async () => {
+                const campo = document.getElementById('filtroCampo').value;
+                const q = document.getElementById('busqueda').value.trim();
+                const url = q ? `${API}/api/Producto?${encodeURIComponent(campo)}=${encodeURIComponent(q)}`
+                              : `${API}/api/Producto`;
+                try {
+                    const resp = await fetch(url);
+                    if (!resp.ok) throw new Error(resp.status);
+                    renderRows(await resp.json());
+                } catch (e) { console.error('Error al buscar:', e); }
+            }, 250);
+        }
+
+        // --- Modal de confirmación ---
+        function pedirEliminar(id, nombre) {
+            idAEliminar = id;
+            document.getElementById('modalTexto').textContent =
+                `¿Seguro que quieres eliminar "${nombre}"? Esta acción no se puede deshacer.`;
+            document.getElementById('modalEliminar').classList.add('activo');
+        }
+        function cerrarModal() {
+            idAEliminar = null;
+            document.getElementById('modalEliminar').classList.remove('activo');
+        }
+        async function confirmarEliminar() {
+            if (idAEliminar == null) return;
+            try {
+                const resp = await fetch(`${API}/api/Producto/${idAEliminar}`, { method: 'DELETE' });
+                if (!resp.ok && resp.status !== 204) throw new Error(resp.status);
+                cerrarModal();
+                buscar();
+            } catch (e) { console.error('Error al eliminar:', e); alert('No se pudo eliminar.'); }
+        }
+
+        // Cerrar el modal al hacer clic fuera o pulsar Escape
+        document.getElementById('modalEliminar').addEventListener('click', e => {
+            if (e.target.id === 'modalEliminar') cerrarModal();
+        });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
+
+        // --- IMPORTACIÓN MASIVA (molde para T4) ---
+        // Parsea el texto pegado: una fila por línea, columnas por TAB o por COMA (autodetección).
+        // Orden fijo: Nombre, Precio, Stock, FechaAlta.
+        // Importa pegando: detecta JSON (empieza por '[') o texto tabular (TAB/coma).
+        function importarBulk() {
+            const texto = document.getElementById('bulkTexto').value.trim();
+            const msg = document.getElementById('bulkMsg');
+            msg.className = 'bulk-msg';
+            msg.textContent = '';
+
+            if (!texto) { msg.className = 'bulk-msg error'; msg.textContent = 'No has pegado nada.'; return; }
+
+            let productos = [];
+
+            if (texto.startsWith('[')) {
+                // --- Modo JSON: el usuario pegó el mismo formato que exporta la app ---
+                try {
+                    const arr = JSON.parse(texto);
+                    if (!Array.isArray(arr)) throw new Error('No es una lista');
+                    // Normaliza claves a minúscula y quita el id (lo asigna la BD)
+                    productos = arr.map(o => ({
+                        nombre: o.nombre ?? o.Nombre ?? '',
+                        precio: Number(o.precio ?? o.Precio ?? 0),
+                        stock: parseInt(o.stock ?? o.Stock ?? 0),
+                        fechaAlta: (o.fechaAlta ?? o.FechaAlta ?? new Date().toISOString()).slice(0, 10)
+                    }));
+                } catch (e) {
+                    msg.className = 'bulk-msg error';
+                    msg.textContent = 'El JSON pegado no es válido.';
+                    return;
+                }
+            } else {
+                // --- Modo tabular: una fila por línea, TAB o coma ---
+                const lineas = texto.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+                for (const linea of lineas) {
+                    const celdas = (linea.includes('\t') ? linea.split('\t') : linea.split(','))
+                                    .map(c => c.trim());
+                    if (celdas.length < 4) continue;
+                    productos.push({
+                        nombre: celdas[0],
+                        precio: parseFloat(celdas[1].replace(',', '.')) || 0,
+                        stock: parseInt(celdas[2]) || 0,
+                        fechaAlta: celdas[3] || new Date().toISOString().slice(0, 10)
+                    });
+                }
+            }
+
+            if (productos.length === 0) {
+                msg.className = 'bulk-msg error';
+                msg.textContent = 'No se reconoció ninguna fila válida.';
+                return;
+            }
+
+            enviarBulk(productos, msg);
+        }
+
+        async function enviarBulk(productos, msg) {
+            try {
+                const resp = await fetch(`${API}/api/Producto/bulk`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(productos)
+                });
+                if (!resp.ok) throw new Error(resp.status);
+                const r = await resp.json();
+                msg.className = 'bulk-msg ok';
+                msg.textContent = `✓ ${r.insertados} elementos importados.`;
+                document.getElementById('bulkTexto').value = '';
+                buscar(); // refresca la tabla
+            } catch (e) {
+                console.error('Error al importar:', e);
+                msg.className = 'bulk-msg error';
+                msg.textContent = 'Error al importar. Revisa los datos y la conexión con la API.';
+            }
+        }
+    </script>
+}

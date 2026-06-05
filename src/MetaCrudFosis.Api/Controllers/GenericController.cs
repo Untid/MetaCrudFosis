@@ -12,9 +12,13 @@ namespace MetaCrudFosis.Api.Controllers;
 public class GenericController<T> : ControllerBase where T : class, IEntity
 {
     private readonly IGenericRepository<T> _repository;
+    private readonly ILogRepository _logs;
 
-    public GenericController(IGenericRepository<T> repository)
-        => _repository = repository;
+    public GenericController(IGenericRepository<T> repository, ILogRepository logs)
+    {
+        _repository = repository;
+        _logs = logs;
+    }
 
     // GET /api/Producto                  → todos
     // GET /api/Producto?nombre=Teclado    → filtra por nombre
@@ -39,6 +43,7 @@ public class GenericController<T> : ControllerBase where T : class, IEntity
     public async Task<ActionResult<T>> Create([FromBody] T entity)
     {
         var created = await _repository.AddAsync(entity);
+        _logs.Add("INFO", $"Entidad {typeof(T).Name} creada (Id={created.Id}).");
         return Created($"/api/{typeof(T).Name}/{created.Id}", created);
     }
 
@@ -56,7 +61,10 @@ public class GenericController<T> : ControllerBase where T : class, IEntity
     public async Task<IActionResult> Delete(int id)
     {
         var ok = await _repository.DeleteAsync(id);
-        return ok ? NoContent() : NotFound();
+        if (!ok) return NotFound();
+
+        _logs.Add("INFO", $"Entidad {typeof(T).Name} eliminada (Id={id}).");
+        return NoContent();
     }
 
     [HttpGet("export/json")]
@@ -80,4 +88,22 @@ public class GenericController<T> : ControllerBase where T : class, IEntity
 
         return File(stream.ToArray(), "application/xml", $"{typeof(T).Name}.xml");
     }
+
+    [HttpPost("bulk")]
+    public async Task<IActionResult> CreateBulk([FromBody] List<T> entities)
+    {
+        if (entities is null || entities.Count == 0)
+            return BadRequest("No se recibió ningún elemento.");
+
+        var insertados = 0;
+        foreach (var entity in entities)
+        {
+            await _repository.AddAsync(entity);
+            insertados++;
+        }
+
+        _logs.Add("INFO", $"Importación masiva: {insertados} entidades {typeof(T).Name} creadas.");
+        return Ok(new { insertados });
+    }
+
 }
