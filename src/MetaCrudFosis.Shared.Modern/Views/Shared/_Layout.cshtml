@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] · MetaCrudFosis</title>
+    <link rel="stylesheet" href="/_content/MetaCrudFosis.Shared.Modern/css/modern-theme.css" />
+    @await RenderSectionAsync("Styles", required: false)
+</head>
+<body>
+    <nav class="navbar">
+        <a class="brand" href="/">MetaCrudFosis</a>
+        <a href="/Producto">Productos</a>
+        <a href="/Log">Actividad</a>
+    </nav>
+    <main class="container">
+        @RenderBody()
+    </main>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

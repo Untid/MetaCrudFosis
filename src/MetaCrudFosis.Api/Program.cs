@@ -1,5 +1,6 @@
 using MetaCrudFosis.Api.Data;
 using MetaCrudFosis.Api.Infrastructure;
+using MetaCrudFosis.Api.Middlewares;
 using MetaCrudFosis.Api.Repositories;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
@@ -41,6 +42,8 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi();
     app.MapScalarApiReference();
 }
+
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 app.UseCors("PermitirWeb");
 

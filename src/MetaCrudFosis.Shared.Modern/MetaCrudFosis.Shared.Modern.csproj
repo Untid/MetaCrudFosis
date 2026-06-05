@@ -11,6 +11,22 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Update="wwwroot\css\modern-theme.css">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>modern-theme.Designer.cs</LastGenOutput>
+    </Content>
+    <Content Update="wwwroot\css\modern-theme.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>modern-theme.css</DependentUpon>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Views\Shared\" />
+  </ItemGroup>
+
 
 
 </Project>
