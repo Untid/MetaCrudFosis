@@ -1,5 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
 
+  <ItemGroup>
+    <ProjectReference Include="..\MetaCrudFosis.Shared.Modern\MetaCrudFosis.Shared.Modern.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Views\Log\" />
+    <Folder Include="Views\Producto\" />
+  </ItemGroup>
+
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
