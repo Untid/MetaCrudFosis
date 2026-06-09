@@ -80,6 +80,15 @@
             display: none;
         }
 
+        #cargando {
+            display: none;
+            margin-top: 12px;
+        }
+
+            #cargando p {
+                margin: 0 0 6px;
+            }
+
         .color-fila {
             display: flex;
             align-items: center;
@@ -149,6 +158,13 @@
                 <span class="hint">El CRUD se generará en la API y la Web.</span>
                 <button class="btn-generar" onclick="generar()">⚡ Generar Aplicación</button>
                 <button onclick="previsualizar()" type="button">👁 Previsualizar</button>
+            </div>
+
+            <div id="cargando">
+                <p>Generando aplicación, por favor espere…</p>
+                <div class="progress-indicator segmented">
+                    <span class="progress-indicator-bar" style="width: 100%;"></span>
+                </div>
             </div>
 
             <div id="resultado" class="status-bar"><p class="status-bar-field" id="resultadoTexto"></p></div>

@@ -76,24 +76,25 @@ async function generar() {
     const datos = recogerDatos();
     const res = document.getElementById('resultado');
     const txt = document.getElementById('resultadoTexto');
-    res.style.display = 'block';
+    const cargando = document.getElementById('cargando');
 
-    // Validación mínima en cliente
-    if (!datos.entityName) { txt.textContent = '⚠ Indica el nombre de la entidad.'; return; }
-    if (datos.fields.length === 0) { txt.textContent = '⚠ Añade al menos un campo.'; return; }
+    if (!datos.entityName) { res.style.display = 'block'; txt.textContent = '⚠ Indica el nombre de la entidad.'; return; }
+    if (datos.fields.length === 0) { res.style.display = 'block'; txt.textContent = '⚠ Añade al menos un campo.'; return; }
 
-    txt.textContent = 'Generando…';
+    cargando.style.display = 'block';   // mostrar barra
+    res.style.display = 'none';
     try {
         const resp = await fetch('/api/generar', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(datos)
+            method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datos)
         });
         const r = await resp.json();
+        res.style.display = 'block';
         txt.textContent = r.mensaje || (r.ok ? '✓ Generado.' : '✗ Error.');
     } catch (e) {
+        res.style.display = 'block';
         txt.textContent = '✗ Error de conexión con el generador.';
-        console.error(e);
+    } finally {
+        cargando.style.display = 'none';   // ocultar barra siempre
     }
 }
 

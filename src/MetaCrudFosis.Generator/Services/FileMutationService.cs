@@ -47,12 +47,16 @@ public class FileMutationService
             var webCtrl = Path.Combine(src, "MetaCrudFosis.Web", "Controllers", $"{entity}Controller.cs");
             var webViewDir = Path.Combine(src, "MetaCrudFosis.Web", "Views", entity);
             var webViewIdx = Path.Combine(webViewDir, "Index.cshtml");
+            var webViewCreate = Path.Combine(webViewDir, "Create.cshtml");
+            var webViewEdit = Path.Combine(webViewDir, "Edit.cshtml");
 
             // Generar contenido (motor 3B)
             var contenidoApiModel = _engine.GenerarModeloApi(entity, campos);
             var contenidoWebModel = _engine.GenerarModeloWeb(entity, campos);
             var contenidoWebCtrl = _engine.GenerarControladorWeb(entity);
             var contenidoWebIndex = _engine.GenerarVistaIndex(entity, corpColor, campos);
+            var contenidoCreate = _engine.GenerarVistaCreate(entity, corpColor, campos);
+            var contenidoEdit = _engine.GenerarVistaEdit(entity, corpColor, campos);
 
             // Crear carpeta de vistas si no existe
             Directory.CreateDirectory(webViewDir);
@@ -62,6 +66,8 @@ public class FileMutationService
             await File.WriteAllTextAsync(webModel, contenidoWebModel); creados.Add(webModel);
             await File.WriteAllTextAsync(webCtrl, contenidoWebCtrl); creados.Add(webCtrl);
             await File.WriteAllTextAsync(webViewIdx, contenidoWebIndex); creados.Add(webViewIdx);
+            await File.WriteAllTextAsync(webViewCreate, contenidoCreate); creados.Add(webViewCreate);
+            await File.WriteAllTextAsync(webViewEdit, contenidoEdit); creados.Add(webViewEdit);
 
             // Registrar SUCCESS en el log de la API (NoSQL). No bloqueante: si la API
             // está apagada, el log falla en silencio pero la generación se da por buena.

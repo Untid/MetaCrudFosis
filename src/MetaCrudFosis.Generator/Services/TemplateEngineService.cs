@@ -106,4 +106,35 @@ public class TemplateEngineService
             .Replace("<#= BulkMapCeldas #>", bulkCeldas.ToString().TrimEnd())
             .Replace("<#= BulkMapObjeto #>", bulkObjeto.ToString().TrimEnd());
     }
+    public string GenerarVistaCreate(string entity, string corpColor, List<Campo> campos)
+            => GenerarFormulario("ViewCreate.tt", entity, corpColor, campos);
+
+    public string GenerarVistaEdit(string entity, string corpColor, List<Campo> campos)
+        => GenerarFormulario("ViewEdit.tt", entity, corpColor, campos);
+
+    private string GenerarFormulario(string plantilla, string entity, string corpColor, List<Campo> campos)
+    {
+        var formFields = new StringBuilder();
+        foreach (var c in campos)
+        {
+            formFields.AppendLine("        <div class=\"form-group\">");
+            formFields.AppendLine($"            <label asp-for=\"{c.Name}\"></label>");
+            var input = c.Type switch
+            {
+                "int" => $"<input asp-for=\"{c.Name}\" type=\"number\" />",
+                "decimal" => $"<input asp-for=\"{c.Name}\" type=\"number\" step=\"0.01\" />",
+                "bool" => $"<input asp-for=\"{c.Name}\" type=\"checkbox\" />",
+                "DateTime" => $"<input asp-for=\"{c.Name}\" />",
+                _ => $"<input asp-for=\"{c.Name}\" />"
+            };
+            formFields.AppendLine($"            {input}");
+            formFields.AppendLine($"            <span asp-validation-for=\"{c.Name}\"></span>");
+            formFields.AppendLine("        </div>");
+        }
+
+        return Leer(plantilla)
+            .Replace("<#= EntityName #>", entity)
+            .Replace("<#= CorpColor #>", corpColor)
+            .Replace("<#= FormFields #>", formFields.ToString().TrimEnd());
+    }
 }
