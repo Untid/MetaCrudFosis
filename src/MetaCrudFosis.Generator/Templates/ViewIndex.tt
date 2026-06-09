@@ -1,0 +1,171 @@
+@model List<<#= EntityName #>>
+@{
+    ViewData["Title"] = "<#= EntityName #>";
+    const string apiBase = "http://localhost:5001";
+}
+
+@section Styles {
+    <style>
+        :root { --corp-color: <#= CorpColor #>; }
+    </style>
+}
+
+<div class="card">
+    <div class="toolbar">
+        <h1><#= EntityName #></h1>
+        <span class="spacer"></span>
+        <select id="filtroCampo" class="filtro-campo" onchange="buscar()">
+<#= FilterOptions #>
+        </select>
+        <input id="busqueda" class="search" type="text" placeholder="Buscar…" oninput="buscar()" />
+        <a class="btn" href="/<#= EntityName #>/Create">+ Crear</a>
+    </div>
+
+    <div class="toolbar">
+        <a class="btn btn-secondary" href="@apiBase/api/<#= EntityName #>/export/json">Exportar JSON</a>
+        <a class="btn btn-secondary" href="@apiBase/api/<#= EntityName #>/export/xml">Exportar XML</a>
+    </div>
+
+    <details class="importar">
+        <summary>📋 Importar varios <#= EntityName #> de golpe</summary>
+        <div class="importar-cuerpo">
+            <p class="importar-ayuda">
+                <strong>Pega celdas desde Excel/Sheets</strong> (separadas por tabuladores o comas),
+                o <strong>pega el JSON</strong> exportado desde esta misma app.
+            </p>
+            <p class="importar-orden">Una fila por línea, en este orden: <code><#= OrdenColumnas #></code></p>
+            <textarea id="bulkTexto" class="bulk-area" rows="6"></textarea>
+            <div class="actions-row">
+                <button class="btn" onclick="importarBulk()">Importar</button>
+                <span id="bulkMsg" class="bulk-msg"></span>
+            </div>
+        </div>
+    </details>
+
+    <table>
+        <thead>
+            <tr><#= TableHeaders #><th>Acciones</th></tr>
+        </thead>
+        <tbody id="tabla">
+            <tr><td class="empty" colspan="20">Cargando…</td></tr>
+        </tbody>
+    </table>
+</div>
+
+<div class="modal-overlay" id="modalEliminar">
+    <div class="modal">
+        <h3>Eliminar <#= EntityName #></h3>
+        <p id="modalTexto">¿Seguro que quieres eliminar este elemento?</p>
+        <div class="actions-row">
+            <button class="btn btn-secondary" onclick="cerrarModal()">Cancelar</button>
+            <button class="btn btn-danger" onclick="confirmarEliminar()">Eliminar</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const API = '@apiBase';
+        const ENTIDAD = '<#= EntityName #>';
+        let debounce, idAEliminar = null;
+
+        function fmtFecha(iso) {
+            if (!iso) return '';
+            const d = new Date(iso);
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${d.getFullYear()}-${mm}-${dd}`;
+        }
+        function fmtNum(n) { return Number(n).toLocaleString('es-ES'); }
+
+        function renderRows(items) {
+            const tbody = document.getElementById('tabla');
+            if (!items.length) { tbody.innerHTML = '<tr><td class="empty" colspan="20">Sin resultados.</td></tr>'; return; }
+            tbody.innerHTML = items.map(x => `
+                <tr>
+<#= RowCells #>
+                    <td class="acciones">
+                        <a class="btn btn-sm btn-secondary" href="/${ENTIDAD}/Edit/${x.id}">Editar</a>
+                        <button class="btn btn-sm btn-danger" onclick="pedirEliminar(${x.id})">Eliminar</button>
+                    </td>
+                </tr>`).join('');
+        }
+
+        function buscar() {
+            clearTimeout(debounce);
+            debounce = setTimeout(async () => {
+                const campo = document.getElementById('filtroCampo').value;
+                const q = document.getElementById('busqueda').value.trim();
+                const url = q ? `${API}/api/${ENTIDAD}?${encodeURIComponent(campo)}=${encodeURIComponent(q)}`
+                              : `${API}/api/${ENTIDAD}`;
+                try { const r = await fetch(url); if (!r.ok) throw new Error(r.status); renderRows(await r.json()); }
+                catch (e) { console.error('Error al buscar:', e); }
+            }, 250);
+        }
+
+        function pedirEliminar(id) { idAEliminar = id; document.getElementById('modalEliminar').classList.add('activo'); }
+        function cerrarModal() { idAEliminar = null; document.getElementById('modalEliminar').classList.remove('activo'); }
+        async function confirmarEliminar() {
+            if (idAEliminar == null) return;
+            try {
+                const r = await fetch(`${API}/api/${ENTIDAD}/${idAEliminar}`, { method: 'DELETE' });
+                if (!r.ok && r.status !== 204) throw new Error(r.status);
+                cerrarModal(); buscar();
+            } catch (e) { console.error(e); alert('No se pudo eliminar.'); }
+        }
+
+        // --- Importación masiva (tabular o JSON) ---
+        function importarBulk() {
+            const texto = document.getElementById('bulkTexto').value.trim();
+            const msg = document.getElementById('bulkMsg');
+            msg.className = 'bulk-msg'; msg.textContent = '';
+            if (!texto) { msg.className = 'bulk-msg error'; msg.textContent = 'No has pegado nada.'; return; }
+
+            let items = [];
+            if (texto.startsWith('[')) {
+                try {
+                    const arr = JSON.parse(texto);
+                    if (!Array.isArray(arr)) throw new Error();
+                    items = arr.map(o => mapearObjeto(o));
+                } catch { msg.className = 'bulk-msg error'; msg.textContent = 'El JSON pegado no es válido.'; return; }
+            } else {
+                const lineas = texto.split('\n').map(l => l.trim()).filter(Boolean);
+                for (const linea of lineas) {
+                    const celdas = (linea.includes('\t') ? linea.split('\t') : linea.split(',')).map(c => c.trim());
+                    if (celdas.length < <#= NumCampos #>) continue;
+                    items.push(mapearCeldas(celdas));
+                }
+            }
+            if (!items.length) { msg.className = 'bulk-msg error'; msg.textContent = 'No se reconoció ninguna fila válida.'; return; }
+            enviarBulk(items, msg);
+        }
+
+        function mapearCeldas(c) {
+            return {
+<#= BulkMapCeldas #>
+            };
+        }
+        function mapearObjeto(o) {
+            return {
+<#= BulkMapObjeto #>
+            };
+        }
+
+        async function enviarBulk(items, msg) {
+            try {
+                const r = await fetch(`${API}/api/${ENTIDAD}/bulk`, {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(items)
+                });
+                if (!r.ok) throw new Error(r.status);
+                const res = await r.json();
+                msg.className = 'bulk-msg ok'; msg.textContent = `✓ ${res.insertados} elementos importados.`;
+                document.getElementById('bulkTexto').value = ''; buscar();
+            } catch (e) { console.error(e); msg.className = 'bulk-msg error'; msg.textContent = 'Error al importar.'; }
+        }
+
+        document.getElementById('modalEliminar').addEventListener('click', e => { if (e.target.id === 'modalEliminar') cerrarModal(); });
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') cerrarModal(); });
+
+        buscar();
+    </script>
+}
