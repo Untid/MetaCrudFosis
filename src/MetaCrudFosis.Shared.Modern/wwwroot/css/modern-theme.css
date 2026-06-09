@@ -197,7 +197,9 @@ td.empty {
 			border-color: var(--corp-color);
 			box-shadow: 0 0 0 3px color-mix(in srgb, var(--corp-color) 20%, transparent);
 		}
-
+		.form-group input[type=checkbox] {
+			width: auto;
+		}
 .field-validation-error, .validation-summary-errors {
 	color: #e23b3b;
 	font-size: .85rem;
