@@ -97,5 +97,17 @@ async function generar() {
     }
 }
 
+async function previsualizar() {
+    const datos = recogerDatos();
+    if (!datos.entityName || datos.fields.length === 0) { alert('Indica nombre y al menos un campo.'); return; }
+    const resp = await fetch('/api/preview', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datos)
+    });
+    const texto = await resp.text();
+    const w = window.open('', '_blank');
+    w.document.write('<pre style="font-family:monospace;white-space:pre-wrap;padding:16px">' +
+        texto.replace(/</g, '&lt;') + '</pre>');
+}
+
 // Arranca con una fila de ejemplo
 agregarCampo('Nombre', 'string');

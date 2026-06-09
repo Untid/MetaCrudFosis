@@ -7,8 +7,11 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Folder Include="Templates\" />
 	  <Folder Include="Properties\" />
 	  <Folder Include="wwwroot\js\" />
+	  <!-- Los .tt son texto plano que el generador lee en ejecución, NO plantillas T4 de VS. -->
+	  <Content Include="Templates\**\*.tt" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 
 </Project>

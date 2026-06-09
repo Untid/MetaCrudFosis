@@ -31,6 +31,10 @@ Mirar lo de si en vez de usar xp.css poder recrear la estética xp en una aplica
 
 Realizar el .exe ? 
 
+ "Generador como MAUI borderless + WebView2 con drag region (estética XP pura, sin marco moderno). Hacer DESPUÉS de Fase 4/5, cuando MAUI ya esté instalado y el motor validado."
+
+Si en el futuro quisieras que mostrara "Fecha Alta" con espacio, se podría insertar un espacio antes de cada mayúscula al generar el Display, pero es puro pulido y lo dejaría para Fase 7. 
+
 ## Versiones Futuras (Largo Plazo)
 - [ ] **Soporte de Imágenes:** Añadir un tipo de campo "Image" que gestione `IFormFile`, guarde la ruta en la BD y muestre un preview en la vista MVC.
 - [ ] **Relaciones entre Entidades:** Soportar generación de claves foráneas (1:N, N:M) y dropdowns dinámicos en los formularios.

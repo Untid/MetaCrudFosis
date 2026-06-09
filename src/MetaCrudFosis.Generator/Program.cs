@@ -1,19 +1,34 @@
-﻿var builder = WebApplication.CreateBuilder(args);
+﻿using MetaCrudFosis.Generator.Services;
 
+var builder = WebApplication.CreateBuilder(args);
 var app = builder.Build();
 
-app.UseDefaultFiles();   // sirve index.html como página por defecto
-app.UseStaticFiles();    // sirve wwwroot (XP.css, el html, el js)
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
-// Endpoint de generación: por ahora responde un placeholder. En la 3C hará la mutación real.
-app.MapPost("/api/generar", (GeneracionRequest req) =>
+var templatesDir = Path.Combine(builder.Environment.ContentRootPath, "Templates");
+var engine = new TemplateEngineService(templatesDir);
+
+// PREVIEW 3B: devuelve el código generado como texto. NO escribe archivos.
+app.MapPost("/api/preview", (GeneracionRequest req) =>
 {
-    // TODO 3C: procesar plantillas y escribir archivos.
-    return Results.Ok(new { ok = true, mensaje = $"(Placeholder) Recibido: {req.EntityName} con {req.Fields?.Count ?? 0} campos." });
+    var campos = (req.Fields ?? new()).Select(f => new Campo(f.Name, f.Type)).ToList();
+    var sb = new System.Text.StringBuilder();
+    sb.AppendLine("==== API Model (Models/" + req.EntityName + ".cs) ====");
+    sb.AppendLine(engine.GenerarModeloApi(req.EntityName, campos));
+    sb.AppendLine("\n==== Web Model (Models/" + req.EntityName + ".cs) ====");
+    sb.AppendLine(engine.GenerarModeloWeb(req.EntityName, campos));
+    sb.AppendLine("\n==== Web Controller (Controllers/" + req.EntityName + "Controller.cs) ====");
+    sb.AppendLine(engine.GenerarControladorWeb(req.EntityName));
+    sb.AppendLine("\n==== View (Views/" + req.EntityName + "/Index.cshtml) ====");
+    sb.AppendLine(engine.GenerarVistaIndex(req.EntityName, req.CorpColor, campos));
+    return Results.Text(sb.ToString(), "text/plain; charset=utf-8");
 });
+
+app.MapPost("/api/generar", (GeneracionRequest req) =>
+    Results.Ok(new { ok = true, mensaje = $"(Placeholder) Recibido: {req.EntityName} con {req.Fields?.Count ?? 0} campos." }));
 
 app.Run();
 
-// Modelo de entrada del formulario (lo usaremos de verdad en la 3C)
 record CampoDto(string Name, string Type);
 record GeneracionRequest(string EntityName, string CorpColor, List<CampoDto> Fields);
