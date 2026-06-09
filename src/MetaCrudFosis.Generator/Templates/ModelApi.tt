@@ -1,0 +1,7 @@
+namespace MetaCrudFosis.Api.Models;
+
+public class <#= EntityName #> : IEntity
+{
+    public int Id { get; set; }
+<#= Properties #>
+}

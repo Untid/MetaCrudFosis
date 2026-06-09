@@ -23,8 +23,20 @@ Este documento recoge mejoras y funcionalidades identificadas que, por limitaci�
     Subir Archivo .CSV directamente con input.
     Revisar Estilos.
 
+página índice que liste entidades generadas + navbar dinámico
+
+"Extraer el JS del Index a un crud-generico.js compartido en la RCL, parametrizado por entidad — reduce lo que T4 genera y centraliza la lógica." 
+
+Mirar lo de si en vez de usar xp.css poder recrear la estética xp en una aplicación de escritorio o consola (al igual embebida? Ni idea)
 
 Realizar el .exe ? 
+
+ "Generador como MAUI borderless + WebView2 con drag region (estética XP pura, sin marco moderno). Hacer DESPUÉS de Fase 4/5, cuando MAUI ya esté instalado y el motor validado."
+
+Si en el futuro quisieras que mostrara "Fecha Alta" con espacio, se podría insertar un espacio antes de cada mayúscula al generar el Display, pero es puro pulido y lo dejaría para Fase 7. 
+
+: "Tras generar una entidad nueva, borrar metacrudfosis.db y reiniciar la API para que aparezca su tabla (limitación de EnsureCreated). Mejora futura: migrar a creación incremental de tablas o a migraciones EF."
+
 
 ## Versiones Futuras (Largo Plazo)
 - [ ] **Soporte de Imágenes:** Añadir un tipo de campo "Image" que gestione `IFormFile`, guarde la ruta en la BD y muestre un preview en la vista MVC.

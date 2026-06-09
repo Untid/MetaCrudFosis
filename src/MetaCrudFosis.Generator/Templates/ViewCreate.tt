@@ -1,0 +1,20 @@
+@model <#= EntityName #>
+@{ ViewData["Title"] = "Crear <#= EntityName #>"; }
+
+@section Styles {
+    <style>
+        :root { --corp-color: <#= CorpColor #>; }
+    </style>
+}
+
+<div class="card">
+    <h1>Nuevo <#= EntityName #></h1>
+    <form asp-action="Create" method="post">
+        <div asp-validation-summary="ModelOnly" class="validation-summary-errors"></div>
+<#= FormFields #>
+        <div class="actions-row">
+            <button type="submit" class="btn">Guardar</button>
+            <a class="btn btn-secondary" href="/<#= EntityName #>">Cancelar</a>
+        </div>
+    </form>
+</div>
