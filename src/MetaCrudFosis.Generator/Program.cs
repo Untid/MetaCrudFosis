@@ -1,6 +1,7 @@
 ﻿using MetaCrudFosis.Generator.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddHttpClient();   // para el log a la API
 var app = builder.Build();
 
 app.UseDefaultFiles();
@@ -8,25 +9,31 @@ app.UseStaticFiles();
 
 var templatesDir = Path.Combine(builder.Environment.ContentRootPath, "Templates");
 var engine = new TemplateEngineService(templatesDir);
+var mutator = new FileMutationService(engine, app.Services.GetRequiredService<IHttpClientFactory>());
 
-// PREVIEW 3B: devuelve el código generado como texto. NO escribe archivos.
 app.MapPost("/api/preview", (GeneracionRequest req) =>
 {
     var campos = (req.Fields ?? new()).Select(f => new Campo(f.Name, f.Type)).ToList();
     var sb = new System.Text.StringBuilder();
-    sb.AppendLine("==== API Model (Models/" + req.EntityName + ".cs) ====");
-    sb.AppendLine(engine.GenerarModeloApi(req.EntityName, campos));
-    sb.AppendLine("\n==== Web Model (Models/" + req.EntityName + ".cs) ====");
-    sb.AppendLine(engine.GenerarModeloWeb(req.EntityName, campos));
-    sb.AppendLine("\n==== Web Controller (Controllers/" + req.EntityName + "Controller.cs) ====");
-    sb.AppendLine(engine.GenerarControladorWeb(req.EntityName));
-    sb.AppendLine("\n==== View (Views/" + req.EntityName + "/Index.cshtml) ====");
-    sb.AppendLine(engine.GenerarVistaIndex(req.EntityName, req.CorpColor, campos));
+    sb.AppendLine("==== API Model ===="); sb.AppendLine(engine.GenerarModeloApi(req.EntityName, campos));
+    sb.AppendLine("\n==== Web Model ===="); sb.AppendLine(engine.GenerarModeloWeb(req.EntityName, campos));
+    sb.AppendLine("\n==== Web Controller ===="); sb.AppendLine(engine.GenerarControladorWeb(req.EntityName));
+    sb.AppendLine("\n==== View ===="); sb.AppendLine(engine.GenerarVistaIndex(req.EntityName, req.CorpColor, campos));
     return Results.Text(sb.ToString(), "text/plain; charset=utf-8");
 });
 
-app.MapPost("/api/generar", (GeneracionRequest req) =>
-    Results.Ok(new { ok = true, mensaje = $"(Placeholder) Recibido: {req.EntityName} con {req.Fields?.Count ?? 0} campos." }));
+// GENERACIÓN REAL: escribe los archivos en la solución.
+app.MapPost("/api/generar", async (GeneracionRequest req) =>
+{
+    if (string.IsNullOrWhiteSpace(req.EntityName))
+        return Results.BadRequest(new { ok = false, mensaje = "Falta el nombre de la entidad." });
+    var campos = (req.Fields ?? new()).Select(f => new Campo(f.Name, f.Type)).ToList();
+    if (campos.Count == 0)
+        return Results.BadRequest(new { ok = false, mensaje = "Añade al menos un campo." });
+
+    var resultado = await mutator.GenerarAsync(req.EntityName.Trim(), req.CorpColor, campos);
+    return Results.Ok(new { ok = resultado.Ok, mensaje = resultado.Mensaje, archivos = resultado.ArchivosCreados });
+});
 
 app.Run();
 
