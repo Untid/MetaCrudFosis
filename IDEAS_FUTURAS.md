@@ -23,6 +23,11 @@ Este documento recoge mejoras y funcionalidades identificadas que, por limitaci�
     Subir Archivo .CSV directamente con input.
     Revisar Estilos.
 
+página índice que liste entidades generadas + navbar dinámico
+
+"Extraer el JS del Index a un crud-generico.js compartido en la RCL, parametrizado por entidad — reduce lo que T4 genera y centraliza la lógica." 
+
+Mirar lo de si en vez de usar xp.css poder recrear la estética xp en una aplicación de escritorio o consola (al igual embebida? Ni idea)
 
 Realizar el .exe ? 
 

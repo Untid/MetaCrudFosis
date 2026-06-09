@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>MetaCrudFosis · Asistente de Generación</title>
+    <link rel="stylesheet" href="https://unpkg.com/xp.css@0.2.6/dist/XP.css" />
+    <style>
+        body {
+            background: #3a6ea5; /* azul Luna de fondo */
+            font-family: 'Tahoma', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 32px 12px;
+        }
+
+        .window {
+            width: 560px;
+            max-width: 100%;
+        }
+
+        .window-body {
+            padding: 16px;
+        }
+
+        .campo-fila {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            margin-bottom: 6px;
+        }
+
+            .campo-fila input[type=text] {
+                flex: 1;
+            }
+
+        .seccion {
+            margin-bottom: 16px;
+        }
+
+            .seccion > label {
+                display: block;
+                font-weight: bold;
+                margin-bottom: 4px;
+            }
+
+        fieldset {
+            margin-bottom: 14px;
+        }
+
+        #bulkArea {
+            display: none;
+            margin-top: 8px;
+        }
+
+            #bulkArea textarea {
+                width: 100%;
+                font-family: 'Courier New', monospace;
+            }
+
+        .botonera {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+        }
+
+        .btn-generar {
+            font-size: 1.05rem;
+            padding: 8px 20px;
+            font-weight: bold;
+        }
+
+        #resultado {
+            margin-top: 12px;
+            padding: 8px;
+            display: none;
+        }
+
+        .color-fila {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+            .color-fila input[type=color] {
+                width: 48px;
+                height: 28px;
+                padding: 0;
+                border: 1px solid #888;
+            }
+
+        .hint {
+            font-size: 11px;
+            color: #444;
+        }
+    </style>
+</head>
+<body>
+    <div class="window">
+        <div class="title-bar">
+            <div class="title-bar-text">⚡ Asistente de Generación de CRUD — MetaCrudFosis</div>
+            <div class="title-bar-controls">
+                <button aria-label="Minimize"></button>
+                <button aria-label="Maximize"></button>
+                <button aria-label="Close"></button>
+            </div>
+        </div>
+        <div class="window-body">
+            <p>Define tu entidad y genera su CRUD completo (API + Web) con un clic.</p>
+
+            <fieldset>
+                <legend>Datos de la entidad</legend>
+                <div class="seccion">
+                    <label for="entityName">Nombre de la entidad (singular, ej: Zapato)</label>
+                    <input type="text" id="entityName" placeholder="Zapato" />
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Campos</legend>
+                <div id="contenedorCampos">
+                    <!-- las filas de campos se inyectan aquí -->
+                </div>
+                <div class="botonera">
+                    <button onclick="agregarCampo()">＋ Añadir campo</button>
+                    <button onclick="toggleBulk()">📋 Pegado inteligente</button>
+                </div>
+
+                <div id="bulkArea">
+                    <p class="hint">Pega una línea por campo con el formato <b>Nombre:Tipo</b> (ej: <code>Talla:int</code>). Tipos: string, int, decimal, DateTime, bool.</p>
+                    <textarea id="bulkTexto" rows="5" placeholder="Talla:int&#10;Precio:decimal&#10;Color:string"></textarea>
+                    <button onclick="procesarBulk()">Convertir en campos</button>
+                </div>
+            </fieldset>
+
+            <fieldset>
+                <legend>Color corporativo</legend>
+                <div class="color-fila">
+                    <input type="color" id="corpColor" value="#e91e63" />
+                    <span id="corpColorTexto">#e91e63</span>
+                </div>
+            </fieldset>
+
+            <div class="botonera">
+                <span class="hint">El CRUD se generará en la API y la Web.</span>
+                <button class="btn-generar" onclick="generar()">⚡ Generar Aplicación</button>
+            </div>
+
+            <div id="resultado" class="status-bar"><p class="status-bar-field" id="resultadoTexto"></p></div>
+        </div>
+    </div>
+
+    <script src="/js/asistente.js"></script>
+</body>
+</html>
