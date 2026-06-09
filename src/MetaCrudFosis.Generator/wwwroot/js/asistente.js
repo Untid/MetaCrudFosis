@@ -81,9 +81,10 @@ async function generar() {
     if (!datos.entityName) { res.style.display = 'block'; txt.textContent = '⚠ Indica el nombre de la entidad.'; return; }
     if (datos.fields.length === 0) { res.style.display = 'block'; txt.textContent = '⚠ Añade al menos un campo.'; return; }
 
-    cargando.style.display = 'block';   // mostrar barra
+    cargando.style.display = 'block';   // ← mostrar barra
     res.style.display = 'none';
     try {
+        await new Promise(r => setTimeout(r, 1200)); // pausa teatral para ver la barra
         const resp = await fetch('/api/generar', {
             method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(datos)
         });
@@ -94,7 +95,7 @@ async function generar() {
         res.style.display = 'block';
         txt.textContent = '✗ Error de conexión con el generador.';
     } finally {
-        cargando.style.display = 'none';   // ocultar barra siempre
+        cargando.style.display = 'none';   // ← ocultar barra
     }
 }
 
