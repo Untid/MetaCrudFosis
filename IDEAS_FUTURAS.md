@@ -35,7 +35,7 @@ Realizar el .exe ?
 
 Si en el futuro quisieras que mostrara "Fecha Alta" con espacio, se podría insertar un espacio antes de cada mayúscula al generar el Display, pero es puro pulido y lo dejaría para Fase 7. 
 
-: "Tras generar una entidad nueva, borrar metacrudfosis.db y reiniciar la API para que aparezca su tabla (limitación de EnsureCreated). Mejora futura: migrar a creación incremental de tablas o a migraciones EF."
+script .bat para arrancar API+Web juntas sin tocar la regla de procesos separados"
 
 
 ## Versiones Futuras (Largo Plazo)
