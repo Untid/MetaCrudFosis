@@ -1,0 +1,53 @@
+@model List<SystemLog>
+@{
+    ViewData["Title"] = "Registro de actividad";
+}
+
+<div class="card">
+    <div class="toolbar">
+        <h1>Registro de actividad</h1>
+        <span class="spacer"></span>
+        <select id="filtroNivel" class="filtro-campo" onchange="filtrarNivel()">
+            <option value="">Todos los niveles</option>
+            <option value="INFO">INFO</option>
+            <option value="ERROR">ERROR</option>
+            <option value="SUCCESS">SUCCESS</option>
+        </select>
+    </div>
+
+    <table>
+        <thead>
+            <tr><th>Nivel</th><th>Mensaje</th><th>Origen</th><th>Fecha y hora</th></tr>
+        </thead>
+        <tbody id="tablaLogs">
+            @if (Model.Count == 0)
+            {
+                <tr><td colspan="4" class="empty">No hay registros todavía.</td></tr>
+            }
+            else
+            {
+                @foreach (var log in Model)
+                {
+                    <tr data-nivel="@log.Level">
+                        <td><span class="badge badge-@log.Level.ToLower()">@log.Level</span></td>
+                        <td>@log.Message</td>
+                        <td>@(string.IsNullOrEmpty(log.Source) ? "—" : log.Source)</td>
+                        <td>@log.Timestamp.ToString("yyyy-MM-dd HH:mm:ss")</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        // Filtro en cliente: oculta/muestra filas por nivel (sin pedir a la API)
+        function filtrarNivel() {
+            const nivel = document.getElementById('filtroNivel').value;
+            document.querySelectorAll('#tablaLogs tr[data-nivel]').forEach(tr => {
+                tr.style.display = (!nivel || tr.dataset.nivel === nivel) ? '' : 'none';
+            });
+        }
+    </script>
+}
