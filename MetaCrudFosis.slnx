@@ -1,6 +1,7 @@
 <Solution>
   <Folder Name="/src/">
     <Project Path="src/MetaCrudFosis.Api/MetaCrudFosis.Api.csproj" />
+    <Project Path="src/MetaCrudFosis.App/MetaCrudFosis.App.csproj" />
     <Project Path="src/MetaCrudFosis.Generator/MetaCrudFosis.Generator.csproj" />
     <Project Path="src/MetaCrudFosis.Shared.Modern/MetaCrudFosis.Shared.Modern.csproj" />
     <Project Path="src/MetaCrudFosis.Web/MetaCrudFosis.Web.csproj" />
