@@ -3,6 +3,7 @@ using MetaCrudFosis.Api.Infrastructure;
 using MetaCrudFosis.Api.Middlewares;
 using MetaCrudFosis.Api.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Scalar.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,7 +35,22 @@ var app = builder.Build();
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    db.Database.EnsureCreated();
+
+    // Creación incremental de tablas:
+    // EF genera el script de creación del esquema; lo adaptamos a "IF NOT EXISTS"
+    // para que cree solo las tablas que aún no existan, sin tocar datos existentes.
+    // Así, al generar una entidad nueva, su tabla aparece sin borrar la BD.
+    var creator = db.GetService<Microsoft.EntityFrameworkCore.Storage.IRelationalDatabaseCreator>();
+
+    // Asegura que el archivo .db existe (no crea tablas)
+    creator.EnsureCreated();
+
+    var script = db.Database.GenerateCreateScript();
+
+    // SQLite: convertir cada "CREATE TABLE" en "CREATE TABLE IF NOT EXISTS"
+    script = script.Replace("CREATE TABLE \"", "CREATE TABLE IF NOT EXISTS \"");
+
+    db.Database.ExecuteSqlRaw(script);
 }
 
 if (app.Environment.IsDevelopment())
