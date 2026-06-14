@@ -10,7 +10,7 @@ public static class Config
 #if ANDROID
     // Emulador: 10.0.2.2 redirige al localhost del PC.
     // Si usas móvil físico, cámbialo por la IP de tu PC: "http://192.168.1.XX:5002"
-    public const string WebUrl = "http://10.0.2.2:5002";
+    public const string WebUrl = "http://192.168.1.161:5002";
 #else
     public const string WebUrl = "http://localhost:5002";
 #endif
