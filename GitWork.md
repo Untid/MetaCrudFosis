@@ -14,7 +14,7 @@ master          → Siempre estable. Solo código que funciona.
 └── develop     → Rama de trabajo principal.
      │
      ├── feature/fase-X-descripcion   → Trabajo por fases
-     ├── demo/nombre-entidad          → Pruebas del generador (borrables)
+     ├── test/nombre-entidad          → Pruebas del generador (borrables)
      └── fix/descripcion              → Bugs puntuales
 
 ## 3. Reglas de Oro

@@ -79,9 +79,23 @@ public class GenericRepository<T> : IGenericRepository<T> where T : class, IEnti
                     }
                 }
             }
+            else if (prop.PropertyType == typeof(bool))
+            {
+                // Booleano → acepta valores humanos: sí/no, true/false, 1/0, verdadero/falso.
+                var v = rawValue.Trim().ToLowerInvariant();
+                bool? valorBool = v switch
+                {
+                    "true" or "sí" or "si" or "1" or "verdadero" => true,
+                    "false" or "no" or "0" or "falso" => false,
+                    _ => null
+                };
+                if (valorBool is null) continue; // no interpretable → se ignora el filtro
+
+                body = Expression.Equal(member, Expression.Constant(valorBool.Value, typeof(bool)));
+            }
             else
             {
-                // int, decimal, bool → igualdad exacta
+                // int, decimal → igualdad exacta
                 object typedValue;
                 try
                 {
