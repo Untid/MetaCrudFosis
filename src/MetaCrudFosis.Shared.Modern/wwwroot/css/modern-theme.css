@@ -197,9 +197,11 @@ td.empty {
 			border-color: var(--corp-color);
 			box-shadow: 0 0 0 3px color-mix(in srgb, var(--corp-color) 20%, transparent);
 		}
+
 		.form-group input[type=checkbox] {
 			width: auto;
 		}
+
 .field-validation-error, .validation-summary-errors {
 	color: #e23b3b;
 	font-size: .85rem;
@@ -292,34 +294,75 @@ td.empty {
 
 /* --- Importación masiva --- */
 .importar {
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    margin-bottom: 18px;
-    background: color-mix(in srgb, var(--corp-color) 3%, var(--surface));
+	border: 1px solid var(--border);
+	border-radius: var(--radius);
+	margin-bottom: 18px;
+	background: color-mix(in srgb, var(--corp-color) 3%, var(--surface));
 }
-.importar summary {
-    cursor: pointer; padding: 14px 18px;
-    font-weight: 600; color: var(--corp-color);
-    user-select: none;
+
+	.importar summary {
+		cursor: pointer;
+		padding: 14px 18px;
+		font-weight: 600;
+		color: var(--corp-color);
+		user-select: none;
+	}
+
+		.importar summary:hover {
+			filter: brightness(.95);
+		}
+
+.importar-cuerpo {
+	padding: 0 18px 18px;
 }
-.importar summary:hover { filter: brightness(.95); }
-.importar-cuerpo { padding: 0 18px 18px; }
-.importar-ayuda { margin: 4px 0 8px; font-size: .92rem; }
-.importar-orden { margin: 0 0 12px; font-size: .88rem; color: var(--text-muted); }
-.importar-orden code {
-    background: var(--bg); padding: 3px 8px; border-radius: 6px;
-    font-size: .85rem; color: var(--text);
+
+.importar-ayuda {
+	margin: 4px 0 8px;
+	font-size: .92rem;
 }
+
+.importar-orden {
+	margin: 0 0 12px;
+	font-size: .88rem;
+	color: var(--text-muted);
+}
+
+	.importar-orden code {
+		background: var(--bg);
+		padding: 3px 8px;
+		border-radius: 6px;
+		font-size: .85rem;
+		color: var(--text);
+	}
+
 .bulk-area {
-    width: 100%; font-family: ui-monospace, 'Cascadia Code', monospace;
-    font-size: .88rem; padding: 12px 14px;
-    border: 1px solid var(--border); border-radius: 8px;
-    resize: vertical; outline: none;
+	width: 100%;
+	font-family: ui-monospace, 'Cascadia Code', monospace;
+	font-size: .88rem;
+	padding: 12px 14px;
+	border: 1px solid var(--border);
+	border-radius: 8px;
+	resize: vertical;
+	outline: none;
 }
-.bulk-area:focus { border-color: var(--corp-color); box-shadow: 0 0 0 3px color-mix(in srgb, var(--corp-color) 20%, transparent); }
-.bulk-msg { font-size: .9rem; align-self: center; }
-.bulk-msg.ok { color: #1a8a4a; }
-.bulk-msg.error { color: #e23b3b; }
+
+	.bulk-area:focus {
+		border-color: var(--corp-color);
+		box-shadow: 0 0 0 3px color-mix(in srgb, var(--corp-color) 20%, transparent);
+	}
+
+.bulk-msg {
+	font-size: .9rem;
+	align-self: center;
+}
+
+	.bulk-msg.ok {
+		color: #1a8a4a;
+	}
+
+	.bulk-msg.error {
+		color: #e23b3b;
+	}
 
 /* --- Badges de nivel de log --- */
 .badge {
@@ -344,4 +387,92 @@ td.empty {
 .badge-success {
 	background: #ddf6e6;
 	color: #1a8a4a;
+}
+
+/* ===== RESPONSIVE MÓVIL ===== */
+@media (max-width: 768px) {
+	.container {
+		margin: 12px auto;
+		padding: 0 12px;
+	}
+
+	.card {
+		padding: 16px;
+	}
+
+	/* Navbar: que crezca a mostrar TODOS los enlaces (sin altura fija que los recorte) */
+	.navbar {
+		flex-wrap: wrap;
+		height: auto;
+		min-height: 0;
+		padding: 10px 16px;
+		gap: 14px;
+		row-gap: 8px;
+		align-items: flex-start;
+	}
+
+		/* La marca ocupa su propia línea; los enlaces se reparten debajo */
+		.navbar .brand {
+			width: 100%;
+		}
+
+		.navbar a {
+			font-size: 1rem;
+			padding: 4px 0;
+		}
+
+	/* Toolbar en columna: cada control en su línea, ancho completo */
+	.toolbar {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 10px;
+	}
+
+		.toolbar .spacer {
+			display: none;
+		}
+
+		.toolbar h1 {
+			margin-bottom: 4px;
+		}
+
+	.search, .filtro-campo {
+		max-width: 100%;
+		width: 100%;
+	}
+
+	/* Botones: que se puedan tocar con el dedo y no se corten */
+	.btn {
+		width: 100%;
+		text-align: center;
+	}
+
+	.acciones {
+		flex-direction: column;
+		gap: 6px;
+	}
+
+		.acciones .btn {
+			width: 100%;
+		}
+
+	/* Tabla: permitir scroll horizontal si no cabe, en vez de desbordar feo */
+	.card table {
+		display: block;
+		overflow-x: auto;
+		white-space: nowrap;
+	}
+
+	/* Formularios e importación a ancho completo */
+	.actions-row {
+		flex-direction: column;
+	}
+
+		.actions-row .btn {
+			width: 100%;
+		}
+
+	.modal {
+		max-width: 92%;
+	}
 }

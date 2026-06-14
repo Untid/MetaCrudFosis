@@ -18,7 +18,7 @@ builder.Services.AddSingleton<ILogRepository, LogRepository>();
 
 builder.Services.AddCors(options =>
     options.AddPolicy("PermitirWeb", policy =>
-        policy.WithOrigins("http://localhost:5002")  // origen de la Web MVC. Ajustable.
+        policy.SetIsOriginAllowed(_ => true)  // dev: permite cualquier origen (incluida la IP del móvil)
               .AllowAnyHeader()
               .AllowAnyMethod()));
 

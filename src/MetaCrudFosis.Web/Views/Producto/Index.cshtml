@@ -100,7 +100,9 @@
 
 @section Scripts {
     <script>
-        const API = '@apiBase';
+        // Deriva la API del host desde el que se cargó la página (puerto 5002→5001).
+        // Funciona en PC, escritorio MAUI y móvil sin hardcodear la IP.
+        const API = window.location.origin.replace(':5002', ':5001');
         let debounce;
         let idAEliminar = null;
 

@@ -65,7 +65,7 @@
 
 @section Scripts {
     <script>
-        const API = '@apiBase';
+        const API = window.location.origin.replace(':5002', ':5001');
         const ENTIDAD = '<#= EntityName #>';
         let debounce, idAEliminar = null;
 

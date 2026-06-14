@@ -37,6 +37,16 @@ Si en el futuro quisieras que mostrara "Fecha Alta" con espacio, se podría inse
 
 script .bat para arrancar API+Web juntas sin tocar la regla de procesos separados"
 
+"Filtro de campos booleanos con desplegable Sí/No en vez de caja de texto (mejora UX en Index y plantilla ViewIndex.tt)"
+
+"Exportación de archivos desde el contenedor MAUI: el WebView no gestiona descargas. Opciones futuras: handler nativo de descargas en MAUI, o abrir el export en navegador externo."
+
+Crea un script .bat (Windows) y .sh (Linux) que haga una copia de metacrudfosis.db y logs.db a una carpeta backups/ con timestamp. Guárdalo en la raíz del repo. Luego cambia el texto por:
+
+
+scrcpy para la demo
+
+"refinar diseño responsive móvil: tablas, formularios"
 
 ## Versiones Futuras (Largo Plazo)
 - [ ] **Soporte de Imágenes:** Añadir un tipo de campo "Image" que gestione `IFormFile`, guarde la ruta en la BD y muestre un preview en la vista MVC.
