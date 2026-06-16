@@ -34,3 +34,4 @@ MetaCrudFosis es una herramienta de scaffolding (andamiaje) que permite definir 
 - [Arquitectura del Sistema](./ARQUITECTURA.md)
 - [Flujo de Trabajo Git](./GitWork.md)
 - [Ideas y Líneas Futuras](./IDEAS_FUTURAS.md)
+- [Manual de Usuario](./Manual.md)
