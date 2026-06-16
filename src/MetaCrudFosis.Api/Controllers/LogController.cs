@@ -3,9 +3,18 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MetaCrudFosis.Api.Controllers;
 
-// DTO de entrada para registrar logs desde fuera (p.ej. el generador T4 en Fase 3)
+/// <summary>
+/// DTO de entrada para registrar logs desde un servicio externo a la API.
+/// Lo usa, por ejemplo, el Generador (Fase 3) para dejar constancia de cada
+/// entidad generada. Se define como record por ser un objeto inmutable de transferencia.
+/// </summary>
 public record LogEntradaDto(string Level, string Message, DateTime? Timestamp);
 
+/// <summary>
+/// Controlador de auditoría. Permite consultar los logs y registrarlos
+/// (tanto internamente como desde servicios externos). Los logs se persisten
+/// en LiteDB (NoSQL), separados de los datos de negocio que viven en SQLite.
+/// </summary>
 [ApiController]
 [Route("api/[controller]")]
 public class LogController : ControllerBase
@@ -14,9 +23,11 @@ public class LogController : ControllerBase
 
     public LogController(ILogRepository logs) => _logs = logs;
 
+    // Devuelve todos los logs registrados (usado por la vista "Actividad" de la Web).
     [HttpGet]
     public IActionResult GetAll() => Ok(_logs.GetAll());
 
+    // Endpoint de prueba para verificar manualmente que el logging funciona.
     [HttpPost("test")]
     public IActionResult AddTest()
     {
@@ -24,9 +35,9 @@ public class LogController : ControllerBase
         return Ok(entry);
     }
 
-    // POST /api/Log  → registra un log desde un servicio externo.
-    // El Timestamp recibido se ignora a propósito: la hora la marca el servidor
-    // (coherencia y seguridad). El generador T4 mandará Level="SUCCESS" y el mensaje.
+    // POST /api/Log → registra un log enviado desde un servicio externo (p. ej. el Generador).
+    // DECISIÓN DE SEGURIDAD/COHERENCIA: el Timestamp recibido en el DTO se IGNORA a propósito;
+    // la marca de tiempo la pone siempre el servidor, evitando que un cliente falsee la hora.
     [HttpPost]
     public IActionResult Add([FromBody] LogEntradaDto dto)
     {

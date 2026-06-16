@@ -2,17 +2,33 @@
 
 namespace MetaCrudFosis.Generator.Services;
 
+/// <summary>
+/// Representa un campo definido por el usuario en el asistente (nombre y tipo).
+/// </summary>
 public record Campo(string Name, string Type);
 
+/// <summary>
+/// Motor de plantillas: el corazón del scaffolding. Lee las plantillas .tt (tratadas como
+/// texto plano con marcadores tipo <#= EntityName #>) y las rellena con los datos de la
+/// entidad mediante string.Replace. NO usa el motor T4 nativo de Visual Studio: implementa
+/// una sustitución propia y ligera. Genera, por entidad: modelo de API, modelo de Web,
+/// controlador MVC de la Web y las vistas (Index, Create, Edit).
+/// </summary>
 public class TemplateEngineService
 {
     private readonly string _templatesDir;
     public TemplateEngineService(string templatesDir) => _templatesDir = templatesDir;
 
+    // Lee una plantilla del directorio de plantillas.
     private string Leer(string nombre) => File.ReadAllText(Path.Combine(_templatesDir, nombre));
+
+    // Convierte la primera letra a minúscula (PascalCase → camelCase) para el JS de las vistas.
     private static string CamelCase(string s) => char.ToLowerInvariant(s[0]) + s.Substring(1);
+
+    // Las propiedades string se inicializan a string.Empty para evitar advertencias de nulabilidad.
     private static string ValorDefecto(string tipo) => tipo == "string" ? " = string.Empty;" : "";
 
+    // Genera el modelo de la entidad para la API: una propiedad por campo.
     public string GenerarModeloApi(string entity, List<Campo> campos)
     {
         var props = new StringBuilder();
@@ -23,6 +39,8 @@ public class TemplateEngineService
             .Replace("<#= Properties #>", props.ToString().TrimEnd());
     }
 
+    // Genera el modelo de la entidad para la Web, añadiendo anotaciones de presentación
+    // (Display, y formato de fecha para los campos DateTime).
     public string GenerarModeloWeb(string entity, List<Campo> campos)
     {
         var props = new StringBuilder();
@@ -42,9 +60,16 @@ public class TemplateEngineService
             .Replace("<#= PropertiesWeb #>", props.ToString().TrimEnd());
     }
 
+    // El controlador MVC de la Web no depende de los campos: basta sustituir el nombre de la entidad.
     public string GenerarControladorWeb(string entity)
         => Leer("ControllerWeb.tt").Replace("<#= EntityName #>", entity);
 
+    /// <summary>
+    /// Genera la vista de listado (Index), la más compleja. Además de la tabla, construye
+    /// dinámicamente: las opciones del filtro, las cabeceras, las celdas (con formato según
+    /// tipo) y el JavaScript de importación "Bulk Paste", que mapea tanto datos tabulares
+    /// pegados (por posición de columna) como objetos JSON (por nombre de propiedad).
+    /// </summary>
     public string GenerarVistaIndex(string entity, string corpColor, List<Campo> campos)
     {
         var filterOptions = new StringBuilder();
@@ -63,6 +88,7 @@ public class TemplateEngineService
             filterOptions.AppendLine($"            <option value=\"{c.Name}\">{c.Name}</option>");
             tableHeaders.Append($"<th>{c.Name}</th>");
 
+            // Formato de cada celda según el tipo del campo.
             var celda = c.Type switch
             {
                 "DateTime" => $"${{fmtFecha(x.{js})}}",
@@ -72,7 +98,7 @@ public class TemplateEngineService
             };
             rowCells.AppendLine($"                    <td>{celda}</td>");
 
-            // Mapeo desde celdas de texto (orden fijo): convierte según tipo
+            // Importación tabular (Excel/Sheets): mapea por posición de columna y convierte por tipo.
             var conv = c.Type switch
             {
                 "int" => $"parseInt(c[{i}]) || 0",
@@ -83,7 +109,7 @@ public class TemplateEngineService
             };
             bulkCeldas.AppendLine($"                {js}: {conv},");
 
-            // Mapeo desde objeto JSON (acepta camelCase y PascalCase)
+            // Importación JSON: mapea por nombre, aceptando camelCase y PascalCase.
             var convObj = c.Type switch
             {
                 "int" => $"parseInt(o.{js} ?? o.{c.Name} ?? 0) || 0",
@@ -106,12 +132,15 @@ public class TemplateEngineService
             .Replace("<#= BulkMapCeldas #>", bulkCeldas.ToString().TrimEnd())
             .Replace("<#= BulkMapObjeto #>", bulkObjeto.ToString().TrimEnd());
     }
+
+    // Las vistas de alta y edición comparten la misma lógica de formulario.
     public string GenerarVistaCreate(string entity, string corpColor, List<Campo> campos)
-            => GenerarFormulario("ViewCreate.tt", entity, corpColor, campos);
+        => GenerarFormulario("ViewCreate.tt", entity, corpColor, campos);
 
     public string GenerarVistaEdit(string entity, string corpColor, List<Campo> campos)
         => GenerarFormulario("ViewEdit.tt", entity, corpColor, campos);
 
+    // Construye los campos del formulario eligiendo el tipo de input adecuado según el tipo del campo.
     private string GenerarFormulario(string plantilla, string entity, string corpColor, List<Campo> campos)
     {
         var formFields = new StringBuilder();

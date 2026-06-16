@@ -106,12 +106,55 @@
             font-size: 11px;
             color: #444;
         }
+
+
+        /* El contenedor necesita altura visible. Algunas versiones de XP.css
+   no le dan altura, así que la fijamos nosotros. */
+        #cargando .progress-indicator {
+            height: 20px;
+            border: 1px solid #888;
+            background: #fff;
+            padding: 2px;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        /* La barra interior: color sólido (azul XP) y altura completa.
+   Si XP.css ya la pinta, esto solo refuerza; si no, la pinta igual. */
+        #cargando .progress-indicator-bar {
+            display: block;
+            height: 100%;
+            background: #3a6ea5; /* azul Luna, a juego con el fondo */
+            /* animación de relleno para que se vea "trabajando" */
+            animation: xpProgreso 1.2s ease-in-out infinite;
+        }
+
+        /* La variante "segmented" de XP dibuja bloques; con esto se ve
+   también como barra continua si la segmentación no carga. */
+        #cargando .progress-indicator.segmented .progress-indicator-bar {
+            background-image: linear-gradient( 90deg, #3a6ea5 0px, #3a6ea5 8px, #ffffff 8px, #ffffff 10px );
+            background-size: 10px 100%;
+        }
+
+        @keyframes xpProgreso {
+            0% {
+                opacity: 0.85;
+            }
+
+            50% {
+                opacity: 1;
+            }
+
+            100% {
+                opacity: 0.85;
+            }
+        }
     </style>
 </head>
 <body>
     <div class="window">
         <div class="title-bar">
-            <div class="title-bar-text">⚡ Asistente de Generación de CRUD — MetaCrudFosis</div>
+            <div class="title-bar-text"> Asistente de Generación de CRUD — MetaCrudFosis</div>
             <div class="title-bar-controls">
                 <button aria-label="Minimize"></button>
                 <button aria-label="Maximize"></button>
@@ -156,8 +199,8 @@
 
             <div class="botonera">
                 <span class="hint">El CRUD se generará en la API y la Web.</span>
-                <button class="btn-generar" onclick="generar()">⚡ Generar Aplicación</button>
-                <button onclick="previsualizar()" type="button">👁 Previsualizar</button>
+                <button class="btn-generar" onclick="generar()"> Generar Aplicación</button>
+                <button onclick="previsualizar()" type="button"> Previsualizar</button>
             </div>
 
             <div id="cargando">

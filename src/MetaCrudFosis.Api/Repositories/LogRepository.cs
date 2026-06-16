@@ -4,8 +4,10 @@ using MetaCrudFosis.Api.Models;
 namespace MetaCrudFosis.Api.Repositories;
 
 /// <summary>
-/// Repositorio NoSQL sobre LiteDB. Persiste en el archivo local "logs.db".
-/// LiteDB autoincrementa el Id entero automáticamente al usar la colección.
+/// Implementación del repositorio de auditoría sobre LiteDB (NoSQL).
+/// Persiste en el archivo local "logs.db". LiteDB crea el archivo y la colección
+/// al vuelo si no existen, y autoincrementa el Id entero automáticamente.
+/// La conexión se abre y cierra en cada operación (using) para liberar el archivo.
 /// </summary>
 public class LogRepository : ILogRepository
 {
@@ -13,13 +15,16 @@ public class LogRepository : ILogRepository
 
     public LogRepository(IConfiguration configuration)
     {
-        // Reutiliza una ruta de archivo local; LiteDB la crea si no existe.
+        // Toma la cadena de conexión de la configuración; si no está, usa un valor por defecto.
+        // "Connection=shared" permite que varios procesos accedan al mismo archivo.
         _connectionString = configuration.GetConnectionString("LiteDb") ?? "Filename=logs.db;Connection=shared";
     }
 
+    // Sobrecarga corta: log sin origen ni detalle.
     public SystemLog Add(string level, string message)
         => Add(level, message, null, null);
 
+    // Registra un log completo. El Timestamp lo pone SIEMPRE el servidor (no el cliente).
     public SystemLog Add(string level, string message, string? source, string? details)
     {
         using var db = new LiteDatabase(_connectionString);
@@ -31,10 +36,10 @@ public class LogRepository : ILogRepository
             Message = message,
             Source = source,
             Details = details,
-            Timestamp = DateTime.Now 
+            Timestamp = DateTime.Now
         };
 
-        logs.Insert(entry);
+        logs.Insert(entry);   // LiteDB asigna el Id automáticamente
         return entry;
     }
 
