@@ -1,16 +1,21 @@
 ﻿using MetaCrudFosis.Generator.Services;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddHttpClient();   // para el log a la API
+builder.Services.AddHttpClient();   // cliente HTTP para enviar el log SUCCESS a la API
 var app = builder.Build();
 
+// Sirve la interfaz web estática del asistente (la UI con estética Windows XP).
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
+// Instancia el motor de plantillas (apuntando a la carpeta Templates) y el orquestador.
+// Se crean manualmente (no por DI) por simplicidad, dado el pequeño tamaño del generador.
 var templatesDir = Path.Combine(builder.Environment.ContentRootPath, "Templates");
 var engine = new TemplateEngineService(templatesDir);
 var mutator = new FileMutationService(engine, app.Services.GetRequiredService<IHttpClientFactory>());
 
+// PREVIEW: genera el código en memoria y lo devuelve como texto, SIN escribir archivos.
+// Permite al usuario revisar el resultado antes de generar de verdad.
 app.MapPost("/api/preview", (GeneracionRequest req) =>
 {
     var campos = (req.Fields ?? new()).Select(f => new Campo(f.Name, f.Type)).ToList();
@@ -22,7 +27,7 @@ app.MapPost("/api/preview", (GeneracionRequest req) =>
     return Results.Text(sb.ToString(), "text/plain; charset=utf-8");
 });
 
-// GENERACIÓN REAL: escribe los archivos en la solución.
+// GENERACIÓN REAL: valida la entrada y escribe físicamente los archivos en la solución.
 app.MapPost("/api/generar", async (GeneracionRequest req) =>
 {
     if (string.IsNullOrWhiteSpace(req.EntityName))
@@ -37,5 +42,7 @@ app.MapPost("/api/generar", async (GeneracionRequest req) =>
 
 app.Run();
 
+// DTOs de entrada del asistente. Se definen aquí, junto al endpoint, como records ligeros:
+// para el alcance del generador no se justifica una capa de dominio separada.
 record CampoDto(string Name, string Type);
 record GeneracionRequest(string EntityName, string CorpColor, List<CampoDto> Fields);

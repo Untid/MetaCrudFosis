@@ -2,9 +2,17 @@
 
 namespace MetaCrudFosis.Web.ViewComponents;
 
+/// <summary>
+/// ViewComponent que construye dinámicamente el menú de navegación de entidades.
+/// En lugar de mantener una lista fija de enlaces, inspecciona la carpeta Views y crea
+/// una entrada por cada entidad que tenga su vista Index.cshtml. Así, cuando el generador
+/// crea una entidad nueva, esta aparece automáticamente en el menú sin tocar el layout.
+/// </summary>
 public class NavEntidadesViewComponent : ViewComponent
 {
     private readonly IWebHostEnvironment _env;
+
+    // Carpetas de Views que NO son entidades de negocio y deben excluirse del menú.
     private static readonly string[] Excluidas = { "Shared", "Home", "Log" };
 
     public NavEntidadesViewComponent(IWebHostEnvironment env) => _env = env;
@@ -16,6 +24,7 @@ public class NavEntidadesViewComponent : ViewComponent
 
         if (Directory.Exists(viewsPath))
         {
+            // Una carpeta es una "entidad navegable" si no está excluida y tiene su Index.cshtml.
             entidades = Directory.GetDirectories(viewsPath)
                 .Select(Path.GetFileName)
                 .Where(nombre => nombre is not null

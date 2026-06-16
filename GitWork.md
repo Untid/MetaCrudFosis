@@ -13,15 +13,14 @@ master          → Siempre estable. Solo código que funciona.
 │
 └── develop     → Rama de trabajo principal.
      │
-     ├── feature/fase-X-descripcion   → Trabajo por fases
-     ├── test/nombre-entidad          → Pruebas del generador (borrables)
-     └── fix/descripcion              → Bugs puntuales
+     ├── feature/Fase-X-Starting   → Trabajo por fases
+     └── test/nombre-entidad       → Pruebas del generador (borrables)
 
 ## 3. Reglas de Oro
 1. NUNCA trabajar directamente sobre master
-2. master solo se toca mediante merge desde develop
+2. master solo se toca mediante merge desde develop (merge --no-ff)
 3. Commits atómicos: 1 commit = 1 cosa lógica
-4. Etiquetar cada fase: `git tag v0.1-fase1-api`
+4. Etiquetar cada fase con un tag de versión
 
 ## 4. Flujo Diario
 
@@ -30,22 +29,22 @@ git checkout develop
 git status
 
 ### Trabajar en tarea:
-git checkout -b feature/fase1-nucleo
+git checkout -b feature/Fase-1-Starting
 # trabajar, commitear...
 git add .
 git commit -m "feat: añade IEntity y GenericRepository"
 
 ### Integrar tarea:
 git checkout develop
-git merge feature/fase1-nucleo
-git tag v0.1-fase1-api
+git merge --no-ff feature/Fase-1-Starting
+git tag v.10-fase1
 
-### Probar generador (ramas demo):
-git checkout -b demo/zapato
+### Probar generador (ramas de prueba):
+git checkout -b test/generar-zapato
 # ejecutar generador, probar...
 # si sale mal:
 git checkout develop
-git branch -D demo/zapato
+git branch -D test/generar-zapato
 
 ## 5. Mensajes de Commit
 Formato: `<tipo>: <descripción>`
@@ -59,13 +58,12 @@ Tipos:
 - style:   CSS/diseño
 - chore:   Mantenimiento
 
-## 6. Tags de Hito
-- v0.1-fase1-api       → Núcleo API funcionando
-- v0.2-fase2-web       → Web MVC + estilos validados
-- v0.3-fase3-generator → Generador T4 + UI XP
-- v0.4-fase4-mutacion  → Primera mutación en vivo
-- v0.5-fase5-maui      → Apps escritorio/móvil
-- v1.0-entregable      → Versión final
+## 6. Tags de Hito (los realmente usados en el proyecto)
+- v.10-fase1   → Núcleo genérico de la API funcionando
+- v2.0-fase2   → Web MVC + estilos validados
+- v3.0-fase3   → Generador + UI XP + motor de plantillas
+- v4.0-fase4   → Creación incremental de tablas (mutación en vivo)
+- v5.0-fase5   → Apps escritorio/móvil (MAUI)
 
 ## 7. Botiquín de Emergencia
 
@@ -80,8 +78,8 @@ Mergeó mal, volver atrás:           git reset --hard ORIG_HEAD
 RECUERDA: git reflog lo registra TODO. Puedes recuperar commits "perdidos".
 
 ## 8. Lo que NO se hace
-- ❌ No GitFlow completo (release/*, hotfix/*)
-- ❌ No commits gigantes de "todo lo de hoy"
-- ❌ No trabajar en master directamente
-- ❌ No borrar master ni develop
-- ❌ No git push --force a master/develop
+- No GitFlow completo (release/*, hotfix/*)
+- No commits gigantes de "todo lo de hoy"
+- No trabajar en master directamente
+- No borrar master ni develop
+- No git push --force a master/develop
