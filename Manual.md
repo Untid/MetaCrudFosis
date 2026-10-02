@@ -106,3 +106,15 @@ El sistema incluye scripts automatizados en la raíz del repositorio para respal
 - **Linux/macOS:** Ejecutar `chmod +x backup.sh` y luego `./backup.sh`
 
 *Política de retención:* El script genera una copia con marca de tiempo en la carpeta `backups/` y elimina automáticamente los archivos con más de 7 días de antigüedad.
+
+
+---
+## 📚 Navegación de la Documentación
+Para una inmersión completa en el proyecto, consulta los siguientes documentos:
+- 🏠 [README: Descripción General](./README.md)
+- ⚙️ [SETUP: Guía de Configuración](./SETUP.md)
+- 🏗️ [ARQUITECTURA: Sistema y Patrones](./ARQUITECTURA.md)
+- 📖 [MANUAL: Usuario y Desarrollador](./MANUAL.md)
+- 🌳 [GitWork: Flujo y Convenciones](./GitWork.md)
+- 🚀 [SISTEMA_DESPLIEGUE: Runbook de Demo](./SISTEMA_DESPLIEGUE.md)
+- 🔮 [IDEAS_FUTURAS: Roadmap](./IDEAS_FUTURAS.md)
