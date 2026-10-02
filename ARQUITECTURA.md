@@ -39,7 +39,7 @@ El objetivo es lograr una separación estricta de responsabilidades, permitiendo
 │                 META CRUD FOSIS SHARED.MODERN               │
 │  (Recursos Transversales) -> Razor Class Library (CSS, Layouts)│
 └─────────────────────────────────────────────────────────────┘
-
+```
 ---
 ## 📚 Navegación de la Documentación
 Para una inmersión completa en el proyecto, consulta los siguientes documentos:
