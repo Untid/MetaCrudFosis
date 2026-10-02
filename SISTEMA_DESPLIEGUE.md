@@ -1,109 +1,92 @@
-# Sistema de despliegue — MetaCrudFosis
+# 🚀 Protocolo de Despliegue y Demostración en Vivo (Runbook)
 
-Protocolo para arrancar el sistema completo, especialmente el día de la defensa.
-Seguir en orden. Preparar con antelación, NO el mismo día.
-
----
-
-## 0. Antes del día (preparación)
-
-- [ ] Probar el arranque completo en una red distinta a la de casa (la del aula si es posible, o un hotspot).
-- [ ] Tener el móvil cargado y el cable USB.
-- [ ] Compilar la app Android con tiempo (la primera compilación tarda varios minutos).
-- [ ] **Plan B de red**: crear un hotspot desde un segundo móvil y conectar PC + móvil de demo a ese hotspot.
-      Las redes institucionales a veces aíslan dispositivos entre sí y rompen la conexión móvil↔PC.
-      El hotspot propio lo evita.
+Este documento establece el procedimiento estandarizado para levantar el sistema **MetaCrudFosis** en entornos de red no controlados (ej. demostraciones en vivo, aulas o redes de invitados). Su objetivo es garantizar una ejecución fluida, sin contratiempos de conectividad.
 
 ---
 
-## 1. Averiguar la IP del PC en la red de la presentación
+## 🛡️ Fase 0: Preparación y Mitigación de Riesgos (Pre-Demo)
+*Realizar estas acciones con antelación, nunca el mismo día de la demostración.*
 
+- [ ] **Prueba de red cruzada:** Verificar el arranque completo en una red distinta a la habitual (ej. hotspot móvil) para simular el entorno de la presentación.
+- [ ] **Plan B de Conectividad:** Las redes institucionales o corporativas suelen tener "aislamiento de clientes" (Client Isolation), lo que impide que el móvil y el PC se vean entre sí. **Solución:** Crear un hotspot desde un segundo dispositivo y conectar tanto el PC como el móvil de demo a esta red.
+- [ ] **Pre-compilación:** Compilar y desplegar la aplicación Android (`MetaCrudFosis.App`) con tiempo. La primera compilación del SDK de Android puede tardar varios minutos.
+- [ ] **Hardware:** Asegurar que el móvil esté cargado al 100% y tener el cable USB a mano.
+
+---
+
+## 🌐 Fase 1: Configuración de Red Local
+
+### 1. Obtener la IP Local del PC
+Ejecutar en la terminal del PC:
 ```bash
 ipconfig
 ```
+Buscar el adaptador de red activo (WiFi o Ethernet) y anotar la **"Dirección IPv4"**.  
+> ⚠️ **IMPORTANTE:** NO usar la "Puerta de enlace predeterminada" (suele acabar en `.1`, esa es la del router). Ejemplo válido: `192.168.1.40`.
 
-Buscar el adaptador WiFi → línea **"Dirección IPv4"**.
-**OJO**: NO usar la "Puerta de enlace predeterminada" (esa es el router, acaba en `.1`).
-Anotar la IPv4, por ejemplo: `192.168.1.40`.
-
----
-
-## 2. Poner esa IP en el Config del MAUI (solo para el móvil)
-
-Editar `src/MetaCrudFosis.App/Config.cs`:
+### 2. Actualizar la Configuración del Cliente MAUI
+Editar el archivo `src/MetaCrudFosis.App/Config.cs` para apuntar a la IP del PC **solo en el entorno Android**:
 
 ```csharp
 #if ANDROID
-    public const string WebUrl = "http://192.168.1.40:5002";  // <-- IP del paso 1
+    // Reemplazar con la IP obtenida en el paso 1
+    public const string WebUrl = "http://192.168.1.40:5002"; 
 #else
+    // Windows Desktop usa localhost sin cambios
     public const string WebUrl = "http://localhost:5002";
 #endif
 ```
 
-> El escritorio (Windows) usa `localhost` y NO necesita cambios.
+### 3. Despliegue en el Dispositivo Móvil
+Con el móvil conectado por USB:
+1. Establecer `MetaCrudFosis.App` como proyecto de inicio en Visual Studio.
+2. Seleccionar el dispositivo físico Android como destino.
+3. Iniciar la depuración (esto reinstala la app con la nueva configuración de IP).
 
 ---
 
-## 3. Recompilar e instalar la app en el móvil
+## ⚙️ Fase 2: Levantamiento de Servicios (Exposición de Red)
 
-Con el móvil conectado por USB, desde Visual Studio:
-- Proyecto de inicio: `MetaCrudFosis.App`
-- Destino (target): tu móvil
-- Pulsar play (reinstala la app con la IP nueva)
-
-> Hacerlo con antelación: la compilación Android tarda.
-
----
-
-## 4. Arrancar los proyectos (cada uno en su terminal)
+Abrir **tres terminales independientes** en la raíz del repositorio y ejecutar en este orden estricto:
 
 ```bash
-# Terminal 1 — API (EXPUESTA a la red)
+# Terminal 1: API (DEBE estar expuesta a todas las interfaces de red)
 dotnet run --project src/MetaCrudFosis.Api --urls "http://0.0.0.0:5001"
 
-# Terminal 2 — Web (EXPUESTA a la red)
+# Terminal 2: Web Frontend (DEBE estar expuesta a todas las interfaces de red)
 dotnet run --project src/MetaCrudFosis.Web --urls "http://0.0.0.0:5002"
 
-# Terminal 3 — Generador (solo si se va a demostrar la generación)
+# Terminal 3: Generador (Opcional, solo si se va a demostrar la creación en vivo)
 dotnet run --project src/MetaCrudFosis.Generator
 ```
 
-> **CRÍTICO**: las DOS apps (API y Web) necesitan `--urls "http://0.0.0.0:..."`.
-> Si solo se expone la Web, el filtro y el borrado fallarán en el móvil.
->
-> `0.0.0.0` significa "escucha en todas las interfaces". En el NAVEGADOR nunca se escribe
-> `0.0.0.0`: se usa `localhost` (desde el PC) o la IP real del PC (desde el móvil).
+> 💡 **Nota Técnica Crítica:**  
+> El parámetro `--urls "http://0.0.0.0:..."` es **obligatorio** para la API y la Web. Le indica a Kestrel que escuche en *todas* las interfaces de red, no solo en `localhost`. Sin esto, el móvil no podrá consumir la API ni la Web.  
+> *(Nota: En el navegador, NUNCA se escribe `0.0.0.0`. Se usa `localhost` desde el PC, o la `IP real` desde el móvil).*
 
 ---
 
-## 5. Requisitos de red
+## 🔍 Fase 3: Smoke Test (Comprobación Previo a la Demo)
 
-- PC y móvil en la **misma WiFi** (o en el mismo hotspot del Plan B).
-- Si el móvil no conecta: **firewall de Windows**. Permitir los puertos 5001 y 5002 en red privada,
-  o desactivar temporalmente el firewall en red privada (reactivarlo después).
-
----
-
-## 6. Comprobación rápida antes de empezar
-
-Desde el navegador del **móvil**, entrar a:
-
-```
-http://TU-IP:5002
-```
-
-- Carga la web → todo listo.
-- No carga → revisar WiFi y firewall ANTES de empezar la demo.
+Antes de comenzar la presentación, validar la conectividad desde el **navegador del móvil**:
+1. Abrir el navegador del móvil e ir a: `http://TU-IP:5002`
+2. **Si carga:** El entorno está listo.
+3. **Si NO carga:** 
+   - Verificar que PC y móvil están en la misma red (ej. el hotspot).
+   - Revisar el **Firewall de Windows**: Asegurar que hay una regla de entrada que permita el tráfico en los puertos `5001` y `5002` para redes privadas (o desactivarlo temporalmente solo para la demo).
 
 ---
 
-## Orden sugerido de la demo
+## 🎬 Fase 4: Guion Sugerido para la Demostración
 
-1. **Web** (navegador del PC, `http://localhost:5002`): CRUD moderno, filtros, importación, exportación, vista de Actividad (logs).
-2. **Generador** (`http://localhost:5003`): generar una entidad nueva en vivo con estética Windows XP. Mostrar el contraste retro → moderno.
-3. Reiniciar la API (la tabla nueva aparece sin borrar datos — creación incremental).
-4. Mostrar la entidad recién generada funcionando en la Web.
-5. **Escritorio** (MAUI Windows): la misma web en ventana nativa.
-6. **Móvil** (MAUI Android, espejado con scrcpy si se proyecta): la misma web en el móvil.
+Para maximizar el impacto, se recomienda seguir este orden narrativo:
 
-> Para proyectar la pantalla del móvil: herramienta `scrcpy` (gratuita, por USB).
+1. **El Producto Final (Web PC):** Abrir `http://localhost:5002`. Mostrar el CRUD moderno, el filtrado avanzado, la importación/exportación y el panel de Actividad (logs en LiteDB).
+2. **El Contraste (El Generador):** Abrir `http://localhost:5003`. Mostrar la estética Windows XP y generar una entidad nueva en vivo (ej. `Vehiculo`).
+3. **La Magia Técnica (Migración Incremental):** **Reiniciar la API** (Ctrl+C y volver a ejecutar). Explicar que, gracias a EF Core, la nueva tabla se crea automáticamente **sin borrar los datos existentes**.
+4. **Validación:** Mostrar la entidad recién generada funcionando perfectamente en la Web.
+5. **Multiplataforma (Escritorio):** Abrir la aplicación MAUI para Windows, demostrando que la misma web se empaqueta como aplicación nativa.
+6. **Multiplataforma (Móvil):** Mostrar la aplicación MAUI en Android. *(Tip Pro: Usar la herramienta gratuita `scrcpy` por USB para proyectar la pantalla del móvil en el proyector del PC con latencia cero).*
+
+---
+*Este runbook garantiza una demostración robusta, profesional y a prueba de fallos de red.*
