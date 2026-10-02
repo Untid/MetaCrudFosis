@@ -86,12 +86,12 @@ Si deseas ejecutar el cliente `MetaCrudFosis.App`:
 
 ---
 
-## 6. 📚 Documentación Relacionada
-
-Para profundizar en aspectos específicos del proyecto, consulta los siguientes documentos:
-
-- 📖 [Manual de Usuario y Desarrollador](./MANUAL.md)
-- 🏗️ [Arquitectura del Sistema y Patrones](./ARQUITECTURA.md)
-- 🌳 [Flujo de Trabajo Git y Convenciones](./GitWork.md)
-- 🚀 [Sistema de Despliegue y Defensa](./SISTEMA_DESPLIEGUE.md)
-- 🔮 [Ideas y Líneas Futuras](./IDEAS_FUTURAS.md)
+## 📚 Navegación de la Documentación
+Para una inmersión completa en el proyecto, consulta los siguientes documentos:
+- 🏠 [README: Descripción General](./README.md)
+- ⚙️ [SETUP: Guía de Configuración](./SETUP.md)
+- 🏗️ [ARQUITECTURA: Sistema y Patrones](./ARQUITECTURA.md)
+- 📖 [MANUAL: Usuario y Desarrollador](./MANUAL.md)
+- 🌳 [GitWork: Flujo y Convenciones](./GitWork.md)
+- 🚀 [SISTEMA_DESPLIEGUE: Runbook de Demo](./SISTEMA_DESPLIEGUE.md)
+- 🔮 [IDEAS_FUTURAS: Roadmap](./IDEAS_FUTURAS.md)
