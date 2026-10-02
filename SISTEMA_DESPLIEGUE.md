@@ -86,7 +86,19 @@ Para maximizar el impacto, se recomienda seguir este orden narrativo:
 3. **La Magia Técnica (Migración Incremental):** **Reiniciar la API** (Ctrl+C y volver a ejecutar). Explicar que, gracias a EF Core, la nueva tabla se crea automáticamente **sin borrar los datos existentes**.
 4. **Validación:** Mostrar la entidad recién generada funcionando perfectamente en la Web.
 5. **Multiplataforma (Escritorio):** Abrir la aplicación MAUI para Windows, demostrando que la misma web se empaqueta como aplicación nativa.
-6. **Multiplataforma (Móvil):** Mostrar la aplicación MAUI en Android. *(Tip Pro: Usar la herramienta gratuita `scrcpy` por USB para proyectar la pantalla del móvil en el proyector del PC con latencia cero).*
+6. **Multiplataforma (Móvil):** Mostrar la aplicación MAUI en Android.
 
 ---
 *Este runbook garantiza una demostración robusta, profesional y a prueba de fallos de red.*
+
+
+---
+## 📚 Navegación de la Documentación
+Para una inmersión completa en el proyecto, consulta los siguientes documentos:
+- 🏠 [README: Descripción General](./README.md)
+- ⚙️ [SETUP: Guía de Configuración](./SETUP.md)
+- 🏗️ [ARQUITECTURA: Sistema y Patrones](./ARQUITECTURA.md)
+- 📖 [MANUAL: Usuario y Desarrollador](./MANUAL.md)
+- 🌳 [GitWork: Flujo y Convenciones](./GitWork.md)
+- 🚀 [SISTEMA_DESPLIEGUE: Runbook de Demo](./SISTEMA_DESPLIEGUE.md)
+- 🔮 [IDEAS_FUTURAS: Roadmap](./IDEAS_FUTURAS.md)
