@@ -1,20 +1,21 @@
-# MetaCrudFosis — Flujo de Trabajo con Git (LOCAL)
+# Flujo de Trabajo y Convenciones de Git
 
-## 1. Filosofía
-- Commits pequeños y frecuentes (cada 30-60 min)
-- Cada commit debe compilar
-- Mensajes en presente: "Añade IEntity", no "Añadido IEntity"
-- Ramas son desechables: crear/borrar sin miedo
-- Antes de algo arriesgado: `git checkout -b backup/antes-de-...`
+Este documento detalla la estrategia de control de versiones utilizada en MetaCrudFosis. Se ha optado por un **GitFlow simplificado**, priorizando la atomicidad de los commits y la estabilidad de la rama principal.
+
+## 1. 🧠 Filosofía de Trabajo
+- **Commits atómicos:** Cada commit debe representar un único cambio lógico y el proyecto debe compilar correctamente tras él.
+- **Frecuencia:** Commits pequeños y frecuentes (cada 30-60 min) para facilitar el rastreo de errores y el rollback.
+- **Ramas desechables:** Crear y borrar ramas de prueba sin miedo. Antes de una refactorización arriesgada: `git checkout -b backup/antes-de-refactor`.
+- **Mensajes en presente:** Se utiliza el imperativo/presente ("Añade IEntity", no "Añadido IEntity").
 
 ## 2. Estructura de Ramas (GitFlow Simplificado)
 
-master          → Siempre estable. Solo código que funciona.
+master          → Siempre estable. Solo código verificado y funcional.
 │
-└── develop     → Rama de trabajo principal.
+└── develop     → Rama de trabajo principal e integración continua.
      │
-     ├── feature/Fase-X-Starting   → Trabajo por fases
-     └── test/nombre-entidad       → Pruebas del generador (borrables)
+     ├── feature/Fase-X-Starting   → Desarrollo de nuevas funcionalidades por fases.
+     └── test/nombre-entidad       → Ramas de prueba para el generador (borrables).
 
 ## 3. Reglas de Oro
 1. NUNCA trabajar directamente sobre master
@@ -24,13 +25,13 @@ master          → Siempre estable. Solo código que funciona.
 
 ## 4. Flujo Diario
 
-### Empezar sesión:
+### Iniciar sesión:
 git checkout develop
 git status
 
 ### Trabajar en tarea:
 git checkout -b feature/Fase-1-Starting
-# trabajar, commitear...
+# ... trabajar y probar...
 git add .
 git commit -m "feat: añade IEntity y GenericRepository"
 
@@ -58,14 +59,16 @@ Tipos:
 - style:   CSS/diseño
 - chore:   Mantenimiento
 
-## 6. Tags de Hito (los realmente usados en el proyecto)
-- v.10-fase1   → Núcleo genérico de la API funcionando
+## 6. Tags de Hito (Versionado)
+Se utilizan tags ligeros para marcar el final de cada fase del proyecto:
+
+- v1.0-fase1   → Núcleo genérico de la API funcionando
 - v2.0-fase2   → Web MVC + estilos validados
 - v3.0-fase3   → Generador + UI XP + motor de plantillas
 - v4.0-fase4   → Creación incremental de tablas (mutación en vivo)
 - v5.0-fase5   → Apps escritorio/móvil (MAUI)
 
-## 7. Botiquín de Emergencia
+## 7. Troubleshooting y Recuperación (Botiquín de Emergencia)
 
 Deshacer cambios en archivo:        git checkout -- archivo.cs
 Cambiar mensaje último commit:      git commit --amend
@@ -73,13 +76,12 @@ Volver al commit anterior (mantener cambios): git reset --soft HEAD~1
 Volver al commit anterior (borrar cambios):   git reset --hard HEAD~1
 Estoy perdido, no sé qué hice:      git reflog
 Guardar cambios a medias:           git stash → git stash pop
-Mergeó mal, volver atrás:           git reset --hard ORIG_HEAD
+Merge fallido, volver atrás:           git reset --hard ORIG_HEAD
 
-RECUERDA: git reflog lo registra TODO. Puedes recuperar commits "perdidos".
+Estoy perdido, necesito recuperar algo: git reflog (Registra TODO. Puedes recuperar commits "perdidos")
 
 ## 8. Lo que NO se hace
 - No GitFlow completo (release/*, hotfix/*)
 - No commits gigantes de "todo lo de hoy"
 - No trabajar en master directamente
-- No borrar master ni develop
 - No git push --force a master/develop
