@@ -1,18 +1,20 @@
-# Arquitectura del Sistema
+# 🏗️ Arquitectura del Sistema: MetaCrudFosis
 
-MetaCrudFosis se basa en un enfoque de **Generación de Código (Scaffolding)** sobre un **núcleo genérico basado en Reflection**, diseñado siguiendo principios de separación de responsabilidades inspirados en Clean Architecture.
+MetaCrudFosis está diseñado siguiendo los principios de **Clean Architecture** y **SOLID**, con un enfoque híbrido que combina un **núcleo genérico basado en Reflection** con un **motor de generación de código (Scaffolding)** personalizado. 
+
+El objetivo es lograr una separación estricta de responsabilidades, permitiendo que la lógica de negocio sea independiente de la interfaz de usuario y de los detalles de implementación.
 
 ## Diagrama de Flujo de Generación
 
 ```text
 ┌─────────────────────────────────────────────────────────────┐
 │                 META CRUD FOSIS GENERATOR                   │
-│  (UI Windows XP) -> Define Entidad, Campos y Color Hex      │
+│  (Capa de Presentación) -> Define Entidad, Campos y Estilos │
 └──────────────────────────────┬──────────────────────────────┘
                                │
                                ▼ (Procesa plantillas .tt por sustitución de texto)
 ┌─────────────────────────────────────────────────────────────┐
-│              MOTOR DE PLANTILLAS (mutación en vivo)         │
+│              MOTOR DE PLANTILLAS (Mutación en vivo)         │
 │  Reemplaza placeholders: <#= EntityName #>, <#= Properties #>│
 └──────────────────────────────┬──────────────────────────────┘
                                │ (Escribe SOLO archivos nuevos: .cs / .cshtml)
@@ -21,27 +23,19 @@ MetaCrudFosis se basa en un enfoque de **Generación de Código (Scaffolding)** 
 │                   PROYECTOS DESTINO                         │
 │                                                             │
 │  [MetaCrudFosis.Api]            [MetaCrudFosis.Web]         │
-│  Genera: Modelo de la entidad   Genera: Modelo, Controlador │
-│                                  MVC y Vistas (.cshtml)      │
+│  (Core/Infraestructura)         (Presentación)              │
+│  Genera: Modelo de la entidad   Genera: Controlador MVC     │
+│                                 y Vistas (.cshtml)          │
 │                                                             │
-│  NO genera (son genéricos y fijos, resueltos por Reflection):│
-│  - GenericController<T>                                      │
-│  - GenericRepository<T>                                      │
-│  - ApplicationDbContext                                      │
-└─────────────────────────────────────────────────────────────┘
-                               │
-                               ▼ (Consumen)
+│     NO se genera por entidad (son genéricos y resueltos     │
+│   dinámicamente mediante Reflection en tiempo de ejecución):│
+│     - GenericController<T>                                  │
+│     - GenericRepository<T>                                  │
+│     - ApplicationDbContext                                  │
+└──────────────────────────────┬──────────────────────────────┘
+                               │ (Consumen recursos compartidos)
+                               ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                 META CRUD FOSIS SHARED.MODERN               │
-│  (Razor Class Library) -> CSS moderno, Layouts base         │
+│  (Recursos Transversales) -> Razor Class Library (CSS, Layouts)│
 └─────────────────────────────────────────────────────────────┘
-```
-
-> **Nota sobre el motor de plantillas**: las plantillas usan una sintaxis inspirada en T4
-> (marcadores `<#= ... #>`), pero el reemplazo lo realiza un servicio propio mediante
-> `string.Replace`, no el motor T4 nativo de Visual Studio.
->
-> **Nota sobre los componentes genéricos**: el controlador, el repositorio y el contexto de
-> datos de la API NO se generan por entidad. Son únicos y genéricos, y resuelven el CRUD de
-> cualquier entidad que implemente `IEntity` mediante Reflection. El motor solo genera el
-> modelo de la entidad (y, en la Web, su controlador MVC y vistas).
