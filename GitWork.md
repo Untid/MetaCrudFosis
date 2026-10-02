@@ -9,14 +9,14 @@ Este documento detalla la estrategia de control de versiones utilizada en MetaCr
 - **Mensajes en presente:** Se utiliza el imperativo/presente ("Añade IEntity", no "Añadido IEntity").
 
 ## 2. Estructura de Ramas (GitFlow Simplificado)
-
+```text
 master          → Siempre estable. Solo código verificado y funcional.
 │
 └── develop     → Rama de trabajo principal e integración continua.
      │
      ├── feature/Fase-X-Starting   → Desarrollo de nuevas funcionalidades por fases.
      └── test/nombre-entidad       → Ramas de prueba para el generador (borrables).
-
+```
 ## 3. Reglas de Oro
 1. NUNCA trabajar directamente sobre master
 2. master solo se toca mediante merge desde develop (merge --no-ff)
