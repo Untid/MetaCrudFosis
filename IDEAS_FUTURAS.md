@@ -1,38 +1,34 @@
-# Ideas y Líneas Futuras de Desarrollo
+# 🗺️ Roadmap y Líneas Futuras de Desarrollo
 
-Este documento recoge mejoras y funcionalidades identificadas que, por limitación de tiempo del TFC, se han dejado para versiones futuras del sistema.
+Este documento actúa como el backlog técnico de MetaCrudFosis. Recoge las mejoras, refactorizaciones y nuevas funcionalidades identificadas durante el desarrollo del TFC, priorizadas para futuras iteraciones del sistema.
 
-## Corto Plazo (Bonus)
-- [ ] **Plugin de Base de Datos:** permitir elegir entre SQLite (por defecto) y SQL Server desde el generador, modificando dinámicamente el `DbContext` y las cadenas de conexión.
-- [ ] **Botón de Limpieza:** implementar en el generador una función que lea un `manifest.json` y elimine los archivos de la última entidad generada, para permitir pruebas iterativas limpias.
-- [ ] **Sistema de Login para el CRUD:** incorporar autenticación (p. ej. ASP.NET Core Identity) para que el acceso al CRUD requiera usuario y, opcionalmente, roles diferenciados. Se valora generar/mutar también la parte de login mediante plantillas.
-- [ ] **Migración a HTTPS:** que las URLs no sean solo HTTP sino HTTPS, validando y certificando su uso (API, Web, CORS, BaseAddress del HttpClient, fetch JS y WebView de MAUI). Pospuesto: en localhost HTTP es suficiente.
+## 🚀 1. Funcionalidades Core (Corto Plazo)
+- [ ] **Plugin de Persistencia Dinámica:** Permitir elegir entre SQLite (por defecto) y SQL Server desde el generador, modificando automáticamente el `DbContext` y las cadenas de conexión.
+- [ ] **Gestión del Ciclo de Vida (Undo/Cleanup):** Implementar un `manifest.json` en el generador que permita eliminar limpiamente los archivos de la última entidad generada, facilitando pruebas iterativas sin dejar basura en el código.
+- [ ] **Sistema de Autenticación y Autorización:** Incorporar ASP.NET Core Identity (o JWT) para proteger el acceso al CRUD, generando también las vistas y controladores de login mediante el motor de plantillas.
 
-## Testing
-- [ ] **Tests automatizados:** añadir un proyecto de pruebas (xUnit) con tests unitarios del `GenericRepository` (CRUD y filtrado) y del `TemplateEngineService` (sustitución de placeholders), para complementar la validación manual actual.
-- [ ] **Generación de tests por entidad:** que el generador cree automáticamente una clase de pruebas básica para cada entidad nueva.
+## 🧪 2. Calidad y Testing (Prioridad Alta)
+- [ ] **Tests Unitarios del Núcleo:** Crear un proyecto de pruebas con **xUnit** (y Moq si aplica) para validar el `GenericRepository<T>` (operaciones CRUD y filtrado) y el `TemplateEngineService` (lógica de sustitución de placeholders).
+- [ ] **Generación de Tests por Entidad:** Extender el motor de plantillas para que, al crear una entidad, genere automáticamente una clase de pruebas unitarias básica (`EntityNameTests.cs`).
 
-## Interfaz y UX
-- [ ] Portada (Home) con bienvenida y enlace a las entidades, o pantalla de carga con estilo.
-- [ ] Importación directa de archivos `.csv` mediante un input de archivo (además del "Bulk Paste" actual).
-- [ ] Página índice que liste las entidades generadas (complementando el navbar dinámico).
-- [ ] Filtro de campos booleanos con desplegable Sí/No en vez de caja de texto (mejora en Index y en la plantilla ViewIndex.tt).
-- [ ] Mostrar "Fecha Alta" con espacio: insertar un espacio antes de cada mayúscula al generar el `Display`. Puro pulido.
-- [ ] Refinar el diseño responsive en móvil (tablas y formularios).
+## 🏗️ 3. Arquitectura y Generación de Código
+- [ ] **Principio DRY en Frontend:** Extraer la lógica JavaScript del `Index` a un archivo `crud-generico.js` compartido en la Razor Class Library (RCL), parametrizado por el nombre de la entidad. Esto reduce la huella de código generado y centraliza el mantenimiento.
+- [ ] **Validaciones Robustas:** Inyectar Data Annotations (`[Required]`, `[StringLength]`, `[EmailAddress]`) en las plantillas del modelo, basándose en la configuración definida por el usuario en el generador.
+- [ ] **Soporte para Relaciones:** Implementar la generación de claves foráneas (1:N, N:M) y desplegables dinámicos en los formularios de creación/edición.
+- [ ] **Gestión de Archivos:** Añadir un tipo de campo "Image/File" que gestione `IFormFile`, guarde la ruta en la BD y muestre una previsualización en la vista.
 
-## Arquitectura y Generación
-- [ ] Extraer el JavaScript del Index a un `crud-generico.js` compartido en la RCL, parametrizado por entidad. Reduce lo que el motor genera y centraliza la lógica.
-- [ ] Validaciones avanzadas: inyectar Data Annotations (`[Required]`, `[StringLength]`...) en las plantillas según la configuración del usuario.
-- [ ] Soporte de imágenes: tipo de campo "Image" que gestione `IFormFile`, guarde la ruta en la BD y muestre un preview.
-- [ ] Relaciones entre entidades: claves foráneas (1:N, N:M) y desplegables dinámicos en los formularios.
+## 🎨 4. Experiencia de Usuario (UX/UI)
+- [ ] **Dashboard Inicial:** Crear una pantalla de bienvenida (Home) que liste las entidades disponibles, complementando el navbar dinámico.
+- [ ] **Mejora en la Importación:** Añadir un input de archivo para la importación directa de `.csv`, como alternativa al "Bulk Paste" actual.
+- [ ] **Pulido de Formularios:** 
+  - Reemplazar la caja de texto de campos booleanos por un desplegable o *toggle* (Sí/No).
+  - Formatear automáticamente los nombres de propiedades (ej: insertar espacio antes de mayúsculas: `FechaAlta` → `Fecha Alta`).
+- [ ] **Diseño Responsive:** Refinar el comportamiento de tablas y formularios en dispositivos móviles.
 
-## Generador como aplicación de escritorio (estética XP "pura")
-- [ ] Explorar recrear la estética XP en una aplicación de escritorio nativa, en lugar de XP.css en web.
-- [ ] Generar un ejecutable (`.exe`) del generador.
-- [ ] Opción avanzada: Generador como MAUI sin bordes (borderless) + WebView2 con región de arrastre, para una estética XP sin el marco moderno de la ventana. Hacer cuando MAUI ya esté instalado y el motor validado.
+## 💻 5. Evolución del Generador (Cliente de Escritorio)
+- [ ] **Nativo vs Web:** Explorar la migración del generador a una aplicación de escritorio nativa para una experiencia "Windows XP" más auténtica, sin depender de XP.css en un entorno web.
+- [ ] **MAUI Borderless:** Investigar el uso de MAUI con ventanas sin bordes (`borderless`) + WebView2 con región de arrastre personalizada, eliminando el marco moderno de la ventana del sistema operativo.
 
-## Exportación en móvil
-- [ ] Exportación de archivos desde el contenedor MAUI: el WebView no gestiona descargas. Opciones: handler nativo de descargas en MAUI, o abrir el export en un navegador externo.
-
-## Infraestructura y despliegue
-- [ ] Despliegue en Docker: un `docker-compose.yml` que levante la API, la Web y, opcionalmente, una base de datos SQL Server en contenedores.
+## ☁️ 6. DevOps e Infraestructura
+- [ ] **Contenerización con Docker:** Crear un `docker-compose.yml` que levante de forma desatendida la API, la aplicación Web y una instancia de SQL Server, facilitando el despliegue y el onboarding de nuevos desarrolladores.
+- [ ] **Hardening de Seguridad:** Migrar las comunicaciones a HTTPS, configurando correctamente los certificados de desarrollo, CORS y la `BaseAddress` del HttpClient en MAUI (actualmente pospuesto, ya que HTTP es suficiente para el entorno de desarrollo local).
