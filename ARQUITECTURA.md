@@ -39,3 +39,14 @@ El objetivo es lograr una separación estricta de responsabilidades, permitiendo
 │                 META CRUD FOSIS SHARED.MODERN               │
 │  (Recursos Transversales) -> Razor Class Library (CSS, Layouts)│
 └─────────────────────────────────────────────────────────────┘
+
+---
+## 📚 Navegación de la Documentación
+Para una inmersión completa en el proyecto, consulta los siguientes documentos:
+- 🏠 [README: Descripción General](./README.md)
+- ⚙️ [SETUP: Guía de Configuración](./SETUP.md)
+- 🏗️ [ARQUITECTURA: Sistema y Patrones](./ARQUITECTURA.md)
+- 📖 [MANUAL: Usuario y Desarrollador](./MANUAL.md)
+- 🌳 [GitWork: Flujo y Convenciones](./GitWork.md)
+- 🚀 [SISTEMA_DESPLIEGUE: Runbook de Demo](./SISTEMA_DESPLIEGUE.md)
+- 🔮 [IDEAS_FUTURAS: Roadmap](./IDEAS_FUTURAS.md)
