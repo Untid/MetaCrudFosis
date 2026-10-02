@@ -1,42 +1,97 @@
-# MetaCrudFosis
+# ⚙️ Guía de Configuración y Despliegue Local (SETUP)
 
-> Un motor de generación de CRUDs dinámicos con núcleo genérico y estética retro-futurista.
+Este documento detalla los prerrequisitos, la configuración inicial y los pasos exactos para levantar el entorno de desarrollo de **MetaCrudFosis** en tu máquina local.
 
-## 📌 Descripción
-MetaCrudFosis es una herramienta de scaffolding (andamiaje) que permite definir entidades de negocio a través de un asistente con estética Windows XP. Al generar la entidad, el sistema escribe código fuente en vivo mediante plantillas de texto (estilo T4), creando automáticamente un CRUD completo y funcional con una interfaz moderna y minimalista. La API resuelve el CRUD de cualquier entidad mediante un controlador y un repositorio genéricos basados en Reflection.
+---
 
-## Concepto Visual
-- **El Generador:** estética Windows XP (asistente clásico).
-- **El Producto Generado:** interfaz web moderna, limpia y responsive.
+## 1. 🖥️ Prerrequisitos del Sistema
 
-## Stack Tecnológico
-- **Framework:** .NET 10
-- **IDE:** Visual Studio 2026
-- **Backend:** ASP.NET Core Web API + EF Core 10 + SQLite (datos) + LiteDB (logs)
-- **Frontend:** ASP.NET Core MVC + Razor Class Library (Shared.Modern)
-- **Generación:** motor de plantillas propio (sustitución de placeholders estilo T4)
-- **Multiplataforma:** .NET MAUI (contenedor WebView para escritorio y móvil)
+Antes de comenzar, asegúrate de tener instaladas las siguientes herramientas:
 
-## 📂 Estructura de la Solución
-- `MetaCrudFosis.Generator`: asistente de generación con UI XP (web local, puerto 5003).
-- `MetaCrudFosis.Api`: núcleo genérico con Reflection, repositorios y persistencia (puerto 5001).
-- `MetaCrudFosis.Web`: aplicación MVC que consume la API (puerto 5002).
-- `MetaCrudFosis.App`: contenedor MAUI (escritorio Windows + móvil Android).
-- `MetaCrudFosis.Shared.Modern`: recursos estáticos (CSS, layouts) compartidos (RCL).
+- **.NET 10 SDK**: [Descargar aquí](https://dotnet.microsoft.com/download) (o la versión LTS especificada en el proyecto).
+- **IDE**: Visual Studio 2026 (con las cargas de trabajo "Desarrollo de ASP.NET y web" y "Desarrollo multiplataforma con .NET") o Visual Studio Code con la extensión C# Dev Kit.
+- **Git**: Para clonar el repositorio y gestionar el control de versiones.
+- **(Opcional para móvil)**: Emulador de Android o dispositivo físico con modo desarrollador activado, y las herramientas de Android SDK configuradas.
 
-## Inicio Rápido
-1. Abre la solución en Visual Studio 2026.
-2. Ejecuta `MetaCrudFosis.Generator` (puerto 5003) para crear una nueva entidad.
-3. Ejecuta `MetaCrudFosis.Api` (puerto 5001).
-4. Ejecuta `MetaCrudFosis.Web` (puerto 5002) y navega a la nueva entidad en `http://localhost:5002`.
+---
 
-> Tras generar una entidad nueva, reinicia la API para que aparezca su tabla (creación
-> incremental: no se pierden datos).
+## 2. 📂 Estructura de la Solución
 
-## 📚 Documentación Adicional
-- [Guía de Ejecución y Setup](./SETUP.md)
-- [Manual de Usuario](./MANUAL.md)
-- [Arquitectura del Sistema](./ARQUITECTURA.md)
-- [Sistema de Despliegue (defensa)](./SISTEMA_DESPLIEGUE.md)
-- [Flujo de Trabajo Git](./GitWork.md)
-- [Ideas y Líneas Futuras](./IDEAS_FUTURAS.md)
+El repositorio está organizado en una arquitectura limpia y modular. Cada componente debe ejecutarse de forma independiente:
+
+| Proyecto | Rol en la Arquitectura | Puerto |
+|----------|------------------------|:------:|
+| `MetaCrudFosis.Api` | **Core/Infraestructura**: API REST, EF Core, SQLite (datos) y LiteDB (logs). | `5001` |
+| `MetaCrudFosis.Web` | **Presentación**: Aplicación ASP.NET Core MVC que consume la API. | `5002` |
+| `MetaCrudFosis.Generator` | **Herramienta**: Asistente web (estética XP) para el scaffolding de entidades. | `5003` |
+| `MetaCrudFosis.App` | **Cliente**: Contenedor .NET MAUI para escritorio (Windows) y móvil (Android). | N/A |
+| `MetaCrudFosis.Shared.Modern` | **Recursos**: Razor Class Library (RCL) con CSS y layouts compartidos. | N/A |
+
+---
+
+## 3. 🚀 Inicio Rápido: Levantar el Entorno
+
+Sigue estos pasos en orden para asegurar que todos los servicios se comuniquen correctamente. Se recomienda usar **tres terminales independientes** abiertas en la raíz del repositorio.
+
+### Paso 1: Iniciar el Núcleo (API)
+Es el componente base. Debe estar activo antes que los demás.
+```bash
+dotnet run --project src/MetaCrudFosis.Api
+```
+*(Verifica en la consola que indica: "Now listening on: http://localhost:5001")*
+
+### Paso 2: Iniciar la Interfaz Web (CRUD)
+```bash
+dotnet run --project src/MetaCrudFosis.Web
+```
+*(Accede en tu navegador a: `http://localhost:5002`)*
+
+### Paso 3: Iniciar el Generador de Entidades (Opcional)
+Solo necesario si vas a crear nuevas entidades en esta sesión.
+```bash
+dotnet run --project src/MetaCrudFosis.Generator
+```
+*(Accede en tu navegador a: `http://localhost:5003`)*
+
+> ⚠️ **REGLA DE ORO TRAS GENERAR:**  
+> Cada vez que uses el Generador para crear una nueva entidad, **debes reiniciar el proceso de `MetaCrudFosis.Api`** (Ctrl+C y volver a ejecutar).  
+> *¿Por qué?* EF Core necesita reinicializarse para detectar el nuevo modelo y aplicar la migración incremental de la tabla en SQLite. **Tus datos existentes no se perderán.**
+
+---
+
+## 4. 🛠️ Configuración para .NET MAUI (Escritorio / Móvil)
+
+Si deseas ejecutar el cliente `MetaCrudFosis.App`:
+
+1. **Windows (Escritorio)**: Establece `MetaCrudFosis.App` como proyecto de inicio en Visual Studio y ejecútalo. Se conectará automáticamente a `localhost`.
+2. **Android (Dispositivo físico)**:
+   - Averigua la IP local de tu PC (ejecuta `ipconfig` en Windows).
+   - Edita el archivo `src/MetaCrudFosis.App/Config.cs` y reemplaza `localhost` por tu IP en el bloque `#if ANDROID`.
+   - Inicia la API y la Web exponiéndolas a la red local:
+     ```bash
+     dotnet run --project src/MetaCrudFosis.Api --urls "http://0.0.0.0:5001"
+     dotnet run --project src/MetaCrudFosis.Web --urls "http://0.0.0.0:5002"
+     ```
+   - Asegúrate de que el Firewall de Windows permita el tráfico en los puertos `5001` y `5002`.
+
+---
+
+## 5. 🔧 Solución de Problemas Comunes (Troubleshooting)
+
+| Problema | Causa Probable | Solución |
+|----------|----------------|----------|
+| *"Address already in use"* / *"El puerto ya está en uso"* | Una ejecución anterior de `dotnet` quedó colgada en segundo plano. | Cierra la terminal con `Ctrl+C` o finaliza el proceso `dotnet.exe` desde el Administrador de Tareas. |
+| La Web muestra error 500 o "No se puede conectar a la API" | La API no está ejecutándose o está en un puerto distinto. | Verifica que la Terminal 1 esté activa y escuchando en el puerto `5001`. |
+| El generador crea los archivos, pero no aparecen en la Web | La API no se reinició tras la generación. | Detén la API (Ctrl+C) y vuelve a ejecutarla para que EF Core aplique los cambios. |
+
+---
+
+## 6. 📚 Documentación Relacionada
+
+Para profundizar en aspectos específicos del proyecto, consulta los siguientes documentos:
+
+- 📖 [Manual de Usuario y Desarrollador](./MANUAL.md)
+- 🏗️ [Arquitectura del Sistema y Patrones](./ARQUITECTURA.md)
+- 🌳 [Flujo de Trabajo Git y Convenciones](./GitWork.md)
+- 🚀 [Sistema de Despliegue y Defensa](./SISTEMA_DESPLIEGUE.md)
+- 🔮 [Ideas y Líneas Futuras](./IDEAS_FUTURAS.md)
