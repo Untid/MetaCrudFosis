@@ -32,3 +32,15 @@ Este documento actúa como el backlog técnico de MetaCrudFosis. Recoge las mejo
 ## ☁️ 6. DevOps e Infraestructura
 - [ ] **Contenerización con Docker:** Crear un `docker-compose.yml` que levante de forma desatendida la API, la aplicación Web y una instancia de SQL Server, facilitando el despliegue y el onboarding de nuevos desarrolladores.
 - [ ] **Hardening de Seguridad:** Migrar las comunicaciones a HTTPS, configurando correctamente los certificados de desarrollo, CORS y la `BaseAddress` del HttpClient en MAUI (actualmente pospuesto, ya que HTTP es suficiente para el entorno de desarrollo local).
+
+
+---
+## 📚 Navegación de la Documentación
+Para una inmersión completa en el proyecto, consulta los siguientes documentos:
+- 🏠 [README: Descripción General](./README.md)
+- ⚙️ [SETUP: Guía de Configuración](./SETUP.md)
+- 🏗️ [ARQUITECTURA: Sistema y Patrones](./ARQUITECTURA.md)
+- 📖 [MANUAL: Usuario y Desarrollador](./MANUAL.md)
+- 🌳 [GitWork: Flujo y Convenciones](./GitWork.md)
+- 🚀 [SISTEMA_DESPLIEGUE: Runbook de Demo](./SISTEMA_DESPLIEGUE.md)
+- 🔮 [IDEAS_FUTURAS: Roadmap](./IDEAS_FUTURAS.md)
