@@ -1,135 +1,108 @@
-# Manual de MetaCrudFosis
+# 📖 Manual de Usuario y Desarrollador: MetaCrudFosis
 
-Motor de generación de CRUD dinámico. Este manual cubre cómo arrancar el sistema completo y cómo usarlo.
-
----
-
-## 1. Arquitectura del sistema
-
-MetaCrudFosis está formado por cuatro aplicaciones independientes:
-
-| Proyecto | Qué es | Puerto |
-|----------|--------|--------|
-| `MetaCrudFosis.Api` | API REST + SQLite (datos) + LiteDB (logs) | 5001 |
-| `MetaCrudFosis.Web` | Web MVC moderna que consume la API | 5002 |
-| `MetaCrudFosis.Generator` | Asistente con estética Windows XP que genera entidades | 5003 |
-| `MetaCrudFosis.App` | Contenedor MAUI (escritorio Windows + móvil Android) | — |
-| `MetaCrudFosis.Shared.Modern` | Librería de estilos compartidos (RCL) | — |
-
-Los proyectos se ejecutan **por separado**, cada uno en su terminal.
+Este documento proporciona una guía completa para desplegar, configurar y utilizar el sistema MetaCrudFosis, tanto desde la perspectiva del desarrollador como del usuario final.
 
 ---
 
-## 2. Arrancar el sistema (uso normal en local)
+## 1. 🏗️ Arquitectura y Componentes del Sistema
 
-Abrir una terminal por aplicación. Esperar a que cada una diga "listening" antes de seguir.
+La solución se compone de aplicaciones independientes que se comunican entre sí. Cada una debe ejecutarse en su propio proceso o terminal:
 
+| Proyecto | Descripción | Puerto por defecto |
+|----------|-------------|:------------------:|
+| `MetaCrudFosis.Api` | Núcleo backend: API REST, SQLite (datos) y LiteDB (logs de auditoría). | `5001` |
+| `MetaCrudFosis.Web` | Frontend: Aplicación ASP.NET Core MVC moderna que consume la API. | `5002` |
+| `MetaCrudFosis.Generator` | Herramienta de scaffolding: Asistente web con estética Windows XP para definir entidades. | `5003` |
+| `MetaCrudFosis.App` | Cliente multiplataforma: Contenedor .NET MAUI (Windows Desktop / Android). | N/A |
+| `MetaCrudFosis.Shared.Modern` | Librería de clases Razor (RCL) con estilos CSS y layouts compartidos. | N/A |
+
+---
+
+## 2. 🚀 Inicio Rápido (Entorno de Desarrollo Local)
+
+Para levantar el sistema completo, se recomienda abrir **tres terminales independientes** en la raíz del repositorio y ejecutar los proyectos en el siguiente orden:
+
+### Paso 1: Iniciar la API (Requisito previo)
 ```bash
-# Terminal 1 — API
 dotnet run --project src/MetaCrudFosis.Api
+```
+*(Esperar a que la consola indique que está escuchando en `http://localhost:5001`)*
 
-# Terminal 2 — Web
+### Paso 2: Iniciar la Aplicación Web
+```bash
 dotnet run --project src/MetaCrudFosis.Web
 ```
+*(Acceder desde el navegador a: `http://localhost:5002`)*
 
-Abrir en el navegador: `http://localhost:5002`
-
-Para generar entidades, además:
+### Paso 3: Iniciar el Generador (Opcional, solo si se van a crear entidades)
 ```bash
-# Terminal 3 — Generador
 dotnet run --project src/MetaCrudFosis.Generator
 ```
-Abrir: `http://localhost:5003`
+*(Acceder desde el navegador a: `http://localhost:5003`)*
 
-> **Nota**: para uso solo en el PC, NO hace falta el parámetro `--urls`.
-> Ese parámetro solo es necesario para que el móvil acceda (ver sección 6).
-> En el navegador siempre se escribe `localhost` (o la IP real), NUNCA `0.0.0.0`.
-
----
-
-## 3. Las tres (o cuatro) aplicaciones funcionando a la vez
-
-Es posible tenerlas todas vivas simultáneamente, **cada una en su terminal**.
-Como cada proyecto usa un puerto distinto (5001, 5002, 5003), no hay conflicto.
-
-Si al arrancar una aparece un error de tipo *"address already in use"* / *"el puerto ya está en uso"*:
-- Hay un proceso usando ese puerto (una ejecución anterior que no se cerró).
-- Solución: cerrar la terminal anterior (Ctrl+C) o cerrar el proceso `dotnet` huérfano desde el Administrador de tareas.
-
-Orden recomendado: **API primero**, luego Web, luego Generador. La Web necesita la API viva
-para mostrar datos; el Generador es independiente.
+> ⚠️ **Resolución de conflictos de puertos:**  
+> Si aparece un error *"address already in use"* o *"el puerto ya está en uso"*, significa que una ejecución anterior de `dotnet` quedó en segundo plano.  
+> **Solución:** Cierra la terminal anterior con `Ctrl+C` o finaliza los procesos `dotnet.exe` huérfanos desde el Administrador de Tareas.
 
 ---
 
-## 4. Uso de la Web (CRUD)
+## 3. ⚙️ Flujo de Trabajo: Generar una Nueva Entidad
 
-- **Listar**: la tabla muestra los registros de la entidad.
-- **Crear**: botón "+ Crear" → formulario → Guardar.
-- **Editar / Eliminar**: botones en cada fila (eliminar pide confirmación).
-- **Filtrar**: elegir campo en el desplegable y escribir en la caja de búsqueda.
-  - Texto: búsqueda parcial.
-  - Números: valor exacto.
-  - Fechas: por año (`2026`), año-mes (`2026-05`) o día completo (`2026-05-06`).
-  - Booleanos: escribir `sí`/`no` o `true`/`false`.
-- **Importar varios**: desplegable "Importar", pegar desde Excel/Sheets (tabuladores o comas)
-  o pegar JSON exportado por la propia app.
-- **Exportar**: botones "Exportar JSON" / "Exportar XML".
-- **Actividad**: registro de logs del sistema (altas, bajas, errores, generaciones).
+El motor de scaffolding permite añadir funcionalidad al sistema sin escribir código manualmente. Sigue estos pasos:
 
----
+1. Accede al Generador en `http://localhost:5003`.
+2. Introduce el **nombre de la entidad** en singular (ej: `Zapato`, `Cliente`).
+3. Define los **campos** (Nombre y Tipo: `string`, `int`, `decimal`, `DateTime`, `bool`).  
+   *💡 Tip: Usa el "Pegado inteligente" para introducir múltiples campos a la vez con formato `Nombre:Tipo` (ej: `Talla:int`).*
+4. Selecciona un **color corporativo** para la temática de la interfaz generada.
+5. Haz clic en **⚡ Generar Aplicación**.
 
-## 5. Generar una entidad nueva (Generador)
-
-1. Arrancar el Generador (`http://localhost:5003`).
-2. Indicar el **nombre** de la entidad (singular, ej. `Zapato`).
-3. Añadir **campos**: nombre + tipo (string, int, decimal, DateTime, bool).
-   - Atajo: "Pegado inteligente", pegar líneas `Nombre:Tipo` (ej. `Talla:int`).
-4. Elegir el **color corporativo**.
-5. Pulsar **⚡ Generar Aplicación**.
-
-> **IMPORTANTE — tras generar**: para que la tabla de la nueva entidad aparezca en la base
-> de datos, hay que **reiniciar la API**. Gracias a la creación incremental de tablas, NO se
-> borra la base de datos ni se pierden datos existentes: solo se añade la tabla nueva.
+> 🛑 **IMPORTANTE: Sincronización de Base de Datos**  
+> Tras generar una nueva entidad, **es obligatorio reiniciar el proyecto `MetaCrudFosis.Api`**.  
+> Gracias a la configuración de migraciones incrementales de EF Core, la API detectará el nuevo modelo y creará la tabla correspondiente en SQLite **sin borrar ni afectar los datos existentes**.
 
 ---
 
-## 6. Usar la app en el móvil (Android)
+## 4. 💻 Guía de Uso de la Aplicación Web (CRUD)
 
-Requiere que el móvil acceda al PC por la red local. Pasos:
+Una vez generada la entidad, la interfaz web (`localhost:5002`) ofrece las siguientes capacidades:
 
-1. Averiguar la IP del PC: `ipconfig` → "Dirección IPv4" del adaptador WiFi (no la que acaba en `.1`).
-2. Poner esa IP en `src/MetaCrudFosis.App/Config.cs` (bloque `#if ANDROID`).
-3. Recompilar e instalar la app en el móvil desde Visual Studio.
-4. Arrancar API y Web **expuestas a la red**:
-   ```bash
-   dotnet run --project src/MetaCrudFosis.Api --urls "http://0.0.0.0:5001"
-   dotnet run --project src/MetaCrudFosis.Web --urls "http://0.0.0.0:5002"
-   ```
-5. PC y móvil en la misma WiFi. Si no conecta, revisar el firewall de Windows (puertos 5001/5002 en red privada).
-
-> Para el detalle del día de la presentación, ver `SISTEMA_DESPLIEGUE.md`.
-
-### Limitaciones conocidas en el móvil
-- **Exportar JSON/XML**: no descarga en el contenedor MAUI (el WebView no gestiona descargas de archivos).
-  Funciona en la versión web (navegador) y en escritorio. Pendiente de mejora (ver `IDEAS_FUTURAS.md`).
+- **Listado y Navegación:** Tabla dinámica con paginación y navbar que se actualiza automáticamente con las nuevas entidades.
+- **Creación y Edición:** Formularios generados con validaciones visuales y botones de acción claros.
+- **Filtrado Avanzado:** 
+  - *Texto:* Búsqueda parcial (contiene).
+  - *Números:* Coincidencia exacta.
+  - *Fechas:* Soporta formatos `AAAA`, `AAAA-MM` o `AAAA-MM-DD`.
+  - *Booleanos:* Acepta `sí`/`no` o `true`/`false`.
+- **Importación Masiva (Bulk Paste):** Permite pegar datos directamente desde Excel/Google Sheets (separados por tabuladores) o importar JSON exportado previamente.
+- **Exportación:** Descarga de los datos filtrados en formato `JSON` o `XML`.
+- **Auditoría:** Panel de "Actividad" que registra logs del sistema (altas, bajas, errores y generaciones) mediante LiteDB.
 
 ---
 
-## 7. Copia de seguridad
+## 5. 📱 Despliegue y Uso en Dispositivos Móviles (.NET MAUI)
 
-Ejecutar el script de backup desde la raíz del repositorio:
-- Windows: `backup.bat`
-- Linux/Mac: `backup.sh` (dar permiso una vez: `chmod +x backup.sh`)
+Para probar el cliente móvil (Android) conectado a tu máquina de desarrollo, es necesario exponer los servicios en la red local:
 
-Copia `metacrudfosis.db` y `logs.db` a la carpeta `backups/` con marca de tiempo,
-y elimina automáticamente las copias de más de 7 días (política de retención).
+1. **Obtener la IP local del PC:** Ejecuta `ipconfig` (Windows) y anota la "Dirección IPv4" de tu adaptador WiFi/Ethernet (ej: `192.168.1.XX`).
+2. **Configurar la App MAUI:** Edita el archivo `src/MetaCrudFosis.App/Config.cs` y actualiza la IP en el bloque `#if ANDROID`.
+3. **Exponer los puertos:** Al iniciar la API y la Web, añade el parámetro `--urls` para escuchar en todas las interfaces de red:
+```bash
+dotnet run --project src/MetaCrudFosis.Api --urls "http://0.0.0.0:5001"
+dotnet run --project src/MetaCrudFosis.Web --urls "http://0.0.0.0:5002"
+```
+4. **Conectividad:** Asegúrate de que el móvil y el PC estén en la misma red WiFi. Si hay problemas de conexión, verifica que el Firewall de Windows permita el tráfico entrante en los puertos `5001` y `5002` para redes privadas.
+
+> 📌 *Nota técnica:* La funcionalidad de exportación de archivos (JSON/XML) desde el WebView de MAUI tiene limitaciones nativas de descarga. Esta función está optimizada para la versión Web de escritorio. (Ver `IDEAS_FUTURAS.md` para la hoja de ruta de solución).  
+> *Para configuraciones avanzadas de red y despliegue en producción, consultar `SISTEMA_DESPLIEGUE.md`.*
 
 ---
 
-## 8. Plataformas
+## 6. 💾 Mantenimiento y Copias de Seguridad
 
-| Plataforma | Cómo |
-|------------|------|
-| Web | Navegador, `http://localhost:5002` |
-| Escritorio | App MAUI Windows (usa `localhost`, sin configuración extra) |
-| Móvil | App MAUI Android (requiere IP del PC, ver sección 6) |
+El sistema incluye scripts automatizados en la raíz del repositorio para respaldar las bases de datos (`metacrudfosis.db` y `logs.db`):
+
+- **Windows:** Ejecutar `backup.bat`
+- **Linux/macOS:** Ejecutar `chmod +x backup.sh` y luego `./backup.sh`
+
+*Política de retención:* El script genera una copia con marca de tiempo en la carpeta `backups/` y elimina automáticamente los archivos con más de 7 días de antigüedad.
